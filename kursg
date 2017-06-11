@@ -276,6 +276,14 @@ do
         echo '</div>' >> $outfile
     done
 
+    #
+    # add footer
+    #
+
+    echo "<div id="footer">" >> $outfile
+    cat footer.in >> $outfile
+    echo "</div>" >> $outfile
+
     close_index $outfile
 done
 

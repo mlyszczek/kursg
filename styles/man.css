@@ -64,7 +64,6 @@ hr
 
 div#header
 {
-    font-size: 5px;
     margin-top: 12px;
     margin-left: 12px;
     border-bottom: dotted 1px green;
@@ -75,7 +74,7 @@ div.toc
     margin-top: 12px;
 }
 
-div#logo-footer
+div#footer
 {
     font-size: 1px;
     clear: both;
