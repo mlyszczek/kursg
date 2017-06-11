@@ -1,0 +1,312 @@
+#!/bin/sh
+
+#
+# functions and stuff
+#
+
+function show_help
+{
+    echo "kursg [options]"
+    echo ""
+    echo -e "\t-h        print this help message"
+    echo -e "\t-i<path>  directory to process"
+    echo -e "\t-o>path>  output directory"
+    echo -e "\t-d        delete output directory before generating"
+}
+
+#
+# builds index of all html files
+#
+
+function build_index
+{
+    o=$1  # absolute path to file where index will be printed
+
+    #
+    # make all echo redirect to $o file
+    #
+
+    exec 1<&-
+    exec 1<>"$o"
+
+    #
+    # truncate file if it already exists
+    #
+
+    truncate -s0 $o
+
+    #
+    #
+    # build index and meta information from index.in
+    #
+
+    echo '<!DOCTYPE html>'
+    echo '<html lang="pl">'
+    echo '<head>'
+    echo '<title>'$in_title'</title>'
+    echo '<link rel="stylesheet" type="text/css" href="/style.css">'
+    echo '<link rel="stylesheet" type="text/css" href="/pygment.css">'
+
+    if [ -f custom.css ]
+    then
+        echo '<link rel="stylesheet" type="text/css" href="/custom.css">'
+    fi
+
+    echo '<meta charset="UTF-8">'
+    echo '<meta name="description" content="'$in_description'">'
+    echo '<meta name="keywords" content="'$in_keywords'">'
+    echo '<meta name="author" content="'$in_author'">'
+    echo '</head>'
+    echo '<body>'
+    echo '<div id="header">'
+
+    #
+    # print user defined header (logo or something like that)
+    #
+
+    cat header.in
+
+    echo '</div>'
+
+    #
+    # restore echo output
+    #
+
+    exec &>/dev/tty
+}
+
+
+function close_index
+{
+    o=$1  # absolute path to file where index will be printed
+
+    echo '</body>' >> $o
+    echo '</html>' >> $o
+
+    #
+    # restore echo output
+    #
+
+    exec &>/dev/tty
+}
+
+function get_menu_name
+{
+    file=$1
+
+    echo $(cat $file | grep "^=" -m1 -C1 | head -n1)
+}
+
+
+################################################################################
+# the real code starts here
+################################################################################
+
+
+#
+# parse input parameters
+#
+
+out="$(pwd)/kurwigen_out"
+in="$(pwd)"
+delete=0
+OPTIND=1
+
+while getopts "h?i:o:d" opt
+do
+    case "$opt" in
+    h|\?)
+        show_help
+        exit 0
+        ;;
+
+    i)
+        in="$OPTARG"
+        ;;
+
+    o)
+        out="$OPTARG"
+        ;;
+
+    d)
+        delete=1
+        ;;
+
+
+
+    esac
+done
+
+#
+# source config file
+#
+
+. $in/index.in
+
+#
+# checking for program
+#
+
+markdown_extensions="-x markdown.extensions.fenced_code -x markdown.extensions.codehilite -x markdown.extensions.toc -x markdown.extensions.admonition -x markdown.extensions.tables"
+markdown=$(which markdown_py)
+
+if [ ! -x "$markdown" ]
+then
+    echo "python markdown (markdown_py) was not found on the system"
+    exit 1
+fi
+
+markdown="$markdown $markdown_extensions"
+
+#
+# sanity check of output directory
+#
+
+if [ $delete = 1 ]
+then
+    echo "do you want to delete $out directory recursively?"
+    read answer
+
+    if [ "x$answer" = "xyes" ]
+    then
+        rm -rf $out
+    fi
+fi
+
+[ -d $out ] || mkdir $out
+
+#
+# look for resource directory
+#
+
+res=
+
+if [ -d "/usr/share/kursg" ]
+then
+    res="/usr/share/kursg"
+
+elif [ -d "/usr/local/share/kursg" ]
+then
+    res="/usr/local/share/kursg"
+
+else
+    #
+    # resource not found on the system, assuming portable instalation and that
+    # resources are in the same directory as kursg program
+    #
+    res="$(cd "$(dirname "${0}")" && pwd)"
+fi
+
+#
+# now we can start building the site
+#
+
+cd $in
+
+find . -name "*.md" -print0 | while IFS= read -r -d $'\0' f
+do
+    file=$(basename $f)
+    dname=$(dirname $f)
+    fname=${file%.*}
+    menu=
+    dir=
+    dirnum=0
+    outfile=$out/$dname/$fname.html
+
+    mkdir -p $out/$dname
+
+    build_index $outfile
+
+    if [ "${f%.*}" = "$dname/$fname" ] && [ -d "$dname/$fname" ]
+    then
+        #
+        # currently parsed file (like subsite.md) has corresponding directory
+        # (subsite). In such case we need to generate menu for subsite dir to
+        # be included in subsite.html file
+        #
+
+        dname+="/$fname"
+    fi
+
+    #
+    # generate menu tree for file
+    #
+
+    IFS=$'/'
+    for d in $dname
+    do
+        dir+="$d"
+        ((dirnum++))
+
+        menu+='<div class="menu">'
+        menu+='<ul class="menu">'
+
+        cd "$dir"
+        for md in *.md
+        do
+            menu_name=$(get_menu_name $md)
+            md_name=${md%.*}
+            path=$(echo "$dir/${md_name}.html" | cut -c2-)
+            menu+='<li class="menu"><a class="menu" href="'$path'">'
+            menu+=$menu_name'</a></li>'
+        done
+        cd - > /dev/null
+
+        menu+='</ul>'
+        menu+='</div>'
+        menu+='<div class="content">'
+        dir+='/'
+    done
+    IFS=
+
+    echo $menu >> $outfile
+
+    #
+    # generate html output from markdown file
+    #
+
+    eval $markdown $f >> $outfile
+
+    #
+    # closing all opened <div class="content"> tags
+    #
+
+    for (( c=1; c<=$dirnum; c++ ))
+    do
+        echo '</div>' >> $outfile
+    done
+
+    close_index $outfile
+done
+
+#
+# copy chosen style and pygment
+#
+
+cp $res/styles/$style.css $out/style.css
+cp $res/pygments/$pygment.css $out/pygment.css
+
+#
+# copy static files to output
+#
+
+if [ -f custom.css ]
+then
+    cp custom.css $out
+fi
+
+if [ ! -f static.in ]
+then
+    #
+    # static.in doesn't exist, don't copy anything
+    #
+
+    exit 0
+fi
+
+IFS=$'\n'
+for d in $(cat "static.in")
+do
+    cp -r $d $out
+done
+unset IFS

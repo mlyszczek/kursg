@@ -1,0 +1,328 @@
+/*
+ * http://meyerweb.com/eric/tools/css/reset/
+ * v2.0 | 20110126
+ * License: none (public domain)
+ *
+ * css reset code
+*/
+
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p,
+blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img,
+ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center,
+dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody,
+tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure,
+figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary,
+time, mark, audio, video { margin: 0; padding: 0; border: 0; font-size: 100%;
+font: inherit; vertical-align: baseline; }
+article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav,
+section { display: block; }
+body { line-height: 1; }
+ol, ul { list-style: none; }
+blockquote, q { quotes: none; } blockquote:before, blockquote:after, q:before,
+q:after { content: ''; content: none; }
+table { border-collapse: collapse; border-spacing: 0; }
+
+/*
+ * layout style for basic elements
+ */
+
+body
+{
+    background-color: black;
+    font-family: monospace;
+    color: green;
+    font-size: 14px;
+    display: inline-block;
+}
+
+a
+{
+    text-decoration: none;
+    font-style: italic;
+    color: yellow;
+}
+
+a:visited
+{
+    text-decoration: none;
+    font-style: italic;
+    color: yellow;
+}
+
+a:hover
+{
+    text-decoration: underline;
+}
+
+hr
+{
+    margin-left: 8ch;
+    border-style: dotted;
+    border-width: 1px;
+    border-color: green;
+}
+
+div#header
+{
+    font-size: 5px;
+    margin-top: 12px;
+    margin-left: 12px;
+    border-bottom: dotted 1px green;
+}
+
+div.toc
+{
+    margin-top: 12px;
+}
+
+div#logo-footer
+{
+    font-size: 1px;
+    clear: both;
+    margin: auto;
+    padding-top: 15px;
+    text-align: center;
+}
+
+div.menu
+{
+    float: left;
+}
+
+ul.menu
+{
+    margin: 2ch;
+    padding: 0px;
+    list-style-type: none;
+}
+
+ol.menu
+{
+    margin: 10px;
+    padding: 0px;
+    list-style-position: inside;
+}
+
+.menu li
+{
+    width: auto;
+}
+
+div.codehilite
+{
+    margin-left: 8ch;
+    margin-bottom: 2ch;
+    padding-top: 1ch;
+    padding-left: 4ch;
+    border-left: dotted green 2px;
+    border-top: dotted green 2px;
+    background: 0 !important;
+}
+
+div.content
+{
+    padding-left: 10px;
+    float: left;
+    border-color: green;
+    border-style: dotted;
+    border-width: 1px;
+    border-right: 0px;
+    border-top: 0px;
+    border-bottom: 0px;
+}
+
+div.toc ul
+{
+    margin-left: 4ch;
+    list-style-position: outside;
+    list-style-type: none;
+}
+
+/*
+ * man style for markdown files
+ */
+
+ul
+{
+    margin-left: 8ch;
+    margin-bottom: 2ch;
+    line-height: 110%;
+    list-style-type: disc;
+    width: auto;
+    list-style-position: inside;
+}
+
+ol
+{
+    margin-left: 8ch;
+    margin-bottom: 2ch;
+    line-height: 110%;
+    width: auto;
+    list-style-type: decimal;
+    list-style-position: inside;
+}
+
+/*
+ * table styling
+ */
+
+table, th, td, tr {
+   border: 1px dotted green;
+}
+
+table
+{
+    margin-left: 8ch;
+    margin-bottom: 2ch;
+    margin-top: 2ch;
+    width: calc(100% - 8ch);
+}
+
+th, td
+{
+    padding: 1ch;
+}
+
+tr:hover
+{
+    background: darkslategray;
+}
+
+/*
+ * admonition
+ */
+
+div.admonition
+{
+    border-left: 2px green dotted;
+    border-top: 2px green dotted;
+    margin-left: 8ch;
+    margin-bottom: 2ch;
+    padding-top: 1ch;
+}
+
+div.admonition p
+{
+    margin-left: 5ch;
+}
+
+p.admonition-title
+{
+    margin-left: 1ch !important;
+    text-transform: uppercase;
+}
+
+/*
+ * admonition warnings
+ */
+
+div.warning
+{
+    border-color: red;
+}
+
+div.warning p.admonition-title
+{
+    color: red;
+}
+
+div.warning  p.admonition-title:before
+{
+    content: "!!! ";
+}
+
+/*
+ * admonition attention
+ */
+
+div.attention
+{
+    border-color: yellow;
+}
+
+div.attention p.admonition-title
+{
+    color: yellow;
+}
+
+div.attention  p.admonition-title:before
+{
+    content: "*** ";
+}
+
+/*
+ * admonition note
+ */
+
+div.note
+{
+    border-color: blue;
+}
+
+div.note p.admonition-title
+{
+    color: blue;
+}
+
+div.note  p.admonition-title:before
+{
+    content: "### ";
+}
+
+
+
+blockquote
+{
+/*    content */
+}
+
+li
+{
+    width: 80ch;
+    text-align: justify;
+    text-justify: inter-word;
+}
+
+p
+{
+    margin-top: 0ch;
+    margin-bottom: 1ch;
+    margin-left: 8ch;
+    text-align: center;
+    text-align: justify;
+    text-justify: inter-word;
+    overflow: hidden;
+    width: 80ch;
+    line-height: 110%;
+}
+
+h1, h2, h3
+{
+    color: red;
+    font-weight: bold;
+    margin-top: 2ch;
+    text-transform: uppercase;
+}
+
+h2
+{
+    margin-left: 4ch;
+}
+
+h3
+{
+    margin-left: 8ch;
+}
+
+em
+{
+    color: #5aff8d;
+    text-decoration: underline;
+}
+
+strong
+{
+    color: red;
+    font-weight: bold;
+}
+
