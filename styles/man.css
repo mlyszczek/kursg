@@ -1,10 +1,15 @@
+/* ==========================================================================
+    Licensed under BSD 2clause license. See LICENSE file for more information
+    Author: Michał Łyszczek <michal.lyszczek@bofc.pl>
+   ========================================================================== */
+
 /*
  * http://meyerweb.com/eric/tools/css/reset/
  * v2.0 | 20110126
  * License: none (public domain)
  *
- * css reset code
-*/
+ * css reset code by eric
+ */
 
 html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p,
 blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img,
@@ -21,6 +26,10 @@ ol, ul { list-style: none; }
 blockquote, q { quotes: none; } blockquote:before, blockquote:after, q:before,
 q:after { content: ''; content: none; }
 table { border-collapse: collapse; border-spacing: 0; }
+
+/*
+ * end of css reset code by eric
+ */
 
 /*
  * layout style for basic elements
@@ -72,6 +81,7 @@ div#header
 div.toc
 {
     margin-top: 12px;
+    margin-left: 4ch;
 }
 
 div#footer
@@ -287,11 +297,10 @@ p
     margin-top: 0ch;
     margin-bottom: 1ch;
     margin-left: 8ch;
-    text-align: center;
     text-align: justify;
     text-justify: inter-word;
     overflow: hidden;
-    width: 80ch;
+    max-width: 80ch;
     line-height: 110%;
 }
 
