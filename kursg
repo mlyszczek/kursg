@@ -49,7 +49,7 @@ function build_index
     echo '<html lang="pl">'
     echo '<head>'
     echo '<title>'$in_title'</title>'
-    echo '<link rel="stylesheet" type="text/css" href="/style.css">'
+    echo '<link rel="stylesheet" type="text/css; charset=utf-8" href="/style.css">'
     echo '<link rel="stylesheet" type="text/css" href="/pygment.css">'
 
     if [ -f custom.css ]
@@ -99,7 +99,22 @@ function get_menu_name
 {
     file=$1
 
-    echo $(cat $file | grep "^=" -m1 -C1 | head -n1)
+    title=`grep "^\[kursg-meta\]: # (title: " "$file" | awk '{print $4}'`
+
+    if [ -z "${title}" ]
+    then
+        ###
+        # title wasn't set in file, use first h1 element (one with ===)
+        #
+
+        echo $(cat $file | grep "^=" -m1 -C1 | head -n1)
+    fi
+
+    ###
+    # echo title cutting last character, which is ')'
+    #
+
+    echo ${title:0:-1}
 }
 
 
