@@ -73,14 +73,14 @@ hr
 
 div#header
 {
-    margin-top: 12px;
-    margin-left: 12px;
+    margin-top: 11px;
+    margin-left: 11px;
     border-bottom: dotted 1px green;
 }
 
 div.toc
 {
-    margin-top: 12px;
+    margin-top: 11px;
     margin-left: 4ch;
 }
 
@@ -119,13 +119,26 @@ ol.menu
 
 div.codehilite
 {
-    margin-left: 8ch;
-    margin-bottom: 2ch;
-    padding-top: 1ch;
+    margin-left: 4ch;
+    margin-bottom: 4ch;
+    margin-top: 4ch;
+    padding-top: 4ch;
     padding-left: 4ch;
-    border-left: dotted green 2px;
-    border-top: dotted green 2px;
+    padding-bottom: 4ch;
+    padding-right: 4ch;
+    border-left: solid gray 1px;
+    border-top: solid  gray 1px;
     background: 0 !important;
+}
+
+div.codehilite:before
+{
+    content: "// Przykład";
+    margin-top: -2ch;
+    margin-left: -3ch;
+    margin-bottom: 2ch;
+    display: block;
+    color: grey;
 }
 
 div.content
@@ -158,7 +171,7 @@ ul
     line-height: 110%;
     list-style-type: disc;
     width: auto;
-    list-style-position: inside;
+    list-style-position: outside;
 }
 
 ol
@@ -203,16 +216,19 @@ tr:hover
 
 div.admonition
 {
-    border-left: 2px green dotted;
-    border-top: 2px green dotted;
-    margin-left: 8ch;
-    margin-bottom: 2ch;
-    padding-top: 1ch;
+    border-left: 1px green solid;
+    border-top: 1px green solid;
+    margin-left: 4ch;
+    margin-top: 4ch;
+    margin-bottom: 4ch;
+    padding-top: 2ch;
+    padding-bottom: 2ch;
+    padding-right: 4ch;
 }
 
 div.admonition p
 {
-    margin-left: 5ch;
+    margin-left: 4ch;
 }
 
 p.admonition-title
@@ -222,62 +238,61 @@ p.admonition-title
 }
 
 /*
- * admonition warnings
+ * admonition ostrzezenie
  */
 
-div.warning
+div.ostrzezenie
 {
     border-color: red;
 }
 
-div.warning p.admonition-title
+div.ostrzezenie p.admonition-title
 {
     color: red;
 }
 
-div.warning  p.admonition-title:before
+div.ostrzezenie  p.admonition-title:before
 {
-    content: "!!! ";
+    content: "!! ";
 }
 
 /*
- * admonition attention
+ * admonition uwaga
  */
 
-div.attention
+div.uwaga
 {
     border-color: yellow;
 }
 
-div.attention p.admonition-title
+div.uwaga p.admonition-title
 {
     color: yellow;
 }
 
-div.attention  p.admonition-title:before
+div.uwaga  p.admonition-title:before
 {
-    content: "*** ";
+    content: "** ";
 }
 
 /*
- * admonition note
+ * admonition informacja
  */
 
-div.note
+div.informacja
 {
     border-color: blue;
 }
 
-div.note p.admonition-title
+div.informacja p.admonition-title
 {
     color: blue;
 }
 
-div.note  p.admonition-title:before
+div.informacja  p.admonition-title:before
 {
-    content: "### ";
+    content: "ii ";
 }
-
 
 
 blockquote
@@ -290,6 +305,20 @@ li
     width: 80ch;
     text-align: justify;
     text-justify: inter-word;
+    margin-left: 2ch;
+}
+
+/* hack to forbid any 'li' to exceed 80characters site width, will broke if p is
+ * larger than 80ch */
+
+li li
+{
+    width: 72ch;
+}
+
+li li li
+{
+    width: 64ch;
 }
 
 p
