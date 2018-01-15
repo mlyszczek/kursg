@@ -95,26 +95,65 @@ function close_index
     exec &>/dev/tty
 }
 
-function get_menu_name
+get_kursg_meta()
 {
-    file=$1
+    file="$1"
+    field="$2"
 
-    title=`grep "^\[kursg-meta\]: # (title: " "$file" | awk '{print $4}'`
+    tmp=`grep "^\[kursg-meta\]: # (${field}: " "${file}" | awk '{print $4}'`
 
-    if [ -z "${title}" ]
+    if [ -z "${tmp}" ]
     then
         ###
-        # title wasn't set in file, use first h1 element (one with ===)
+        # field wasn't found, return nothing
         #
-
-        echo $(cat $file | grep "^=" -m1 -C1 | head -n1)
+        return
     fi
 
     ###
-    # echo title cutting last character, which is ')'
+    # echo value and strip trailing ')'
     #
 
-    echo ${title:0:-1}
+    echo ${tmp:0:-1}
+}
+
+get_menu_name()
+{
+    file=$1
+
+    title=`get_kursg_meta "$file" "title"`
+
+    if [ ! -z "${title}" ]
+    then
+        echo ${title}
+        return
+    fi
+
+    ###
+    # title wasn't set in file, use first h1 element (one with ===)
+    #
+
+    echo $(cat $file | grep "^=" -m1 -C1 | head -n1)
+}
+
+get_file_index()
+{
+    file="$1"
+
+    index=`get_kursg_meta "$file" "index"`
+
+    if [ -z "${index}" ]
+    then
+        ###
+        # index was not set, apply maximum possible index and let it be sorted
+        # alphabetically, after files that have index set
+        #
+
+        echo "9999"
+        return
+    fi
+
+    printf "%04d" "${index}"
 }
 
 
@@ -225,13 +264,14 @@ cd $in
 
 find . -name "*.md" -print0 | while IFS= read -r -d $'\0' f
 do
-    file=$(basename $f)
-    dname=$(dirname $f)
+    file=$(basename "$f")
+    dname=$(dirname "$f")
     fname=${file%.*}
     menu=
     dir=
     dirnum=0
-    outfile=$out/$dname/$fname.html
+    file_index=`get_file_index "$f"`
+    outfile="${out}/${dname}/${file_index}-${fname}.html"
 
     mkdir -p $out/$dname
 
@@ -260,18 +300,21 @@ do
 
         menu+='<div class="menu">'
         menu+='<ul class="menu">'
+        menu_links=
 
         cd "$dir"
         for md in *.md
         do
             menu_name=$(get_menu_name $md)
+            md_index=`get_file_index "$md"`
             md_name=${md%.*}
-            path=$(echo "$dir/${md_name}.html" | cut -c2-)
-            menu+='<li class="menu"><a class="menu" href="'$path'">'
-            menu+=$menu_name'</a></li>'
+            path=$(echo "$dir/${md_index}-${md_name}.html" | cut -c2-)
+            menu_links+='<li class="menu"><a class="menu" href="'$path'">'
+            menu_links+="$menu_name</a></li>\n"
         done
         cd - > /dev/null
 
+        menu+=`echo -e "${menu_links}" | sort`
         menu+='</ul>'
         menu+='</div>'
         menu+='<div class="content">'
