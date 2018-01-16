@@ -214,7 +214,7 @@ build_menu()
         menu+='<ul class="menu">'
         menu_links=
 
-        cd "${in}/${dir}"
+        cd "${in}/${dir}" 2> /dev/null
         find . -maxdepth 1 \( -name "*.md" -o -name "*.html" -o -type d \) -print0 | while IFS= read -r -d $'\0' f
         do
 
@@ -225,7 +225,7 @@ build_menu()
 
             if [ -d "${f}" ]
             then
-                if [ -f "${f}/.kursg-ignorea" ] || [ "${f}" = "." ] || \
+                if [ -f "${f}/.kursg-ignore" ] || [ "${f}" = "." ] || \
                    [ -f "${f}.md" ] || [ -f "${f}.html" ]
                 then
                     continue
@@ -257,6 +257,35 @@ build_menu()
     #
 
     echo $dirnum
+}
+
+is_ignored()
+{
+    local dir="${1}"
+
+    while true
+    do
+        if [ -f "${dir}/.kursg-ignore" ]
+        then
+            return 0
+        fi
+
+        dir=`dirname "${dir}"`
+
+        if echo "${dir}" | grep -v '/' > /dev/null
+        then
+            ###
+            # no more directories in path, do one more check and exit
+            #
+
+            if [ -f "${dir}/.kursg-ignore" ]
+            then
+                return 0
+            fi
+
+            return 1
+        fi
+    done
 }
 
 
@@ -378,8 +407,12 @@ do
     file_index=`get_file_index "$f"`
     outfile="${out}/${dname}/${file_index}-${fname}.html"
 
-    mkdir -p $out/$dname
+    if is_ignored "${dname}"
+    then
+        continue
+    fi
 
+    mkdir -p $out/$dname
     build_index $outfile
 
     if [ "${f%.*}" = "$dname/$fname" ] && [ -d "$dname/$fname" ]
@@ -432,7 +465,10 @@ done
 
 find . -type d -print0 | while IFS= read -r -d $'\0' dir
 do
-    cd "${dir}" > /dev/null
+    if is_ignored "${dir}"
+    then
+        continue
+    fi
 
     find . -maxdepth 1 -type d -print0 | while IFS= read -r -d $'\0' d
     do
