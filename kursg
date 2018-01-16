@@ -100,7 +100,24 @@ get_kursg_meta()
     file="$1"
     field="$2"
 
-    tmp=`grep "^\[kursg-meta\]: # (${field}: " "${file}" | awk '{print $4}'`
+    ext="${file##*.}"
+    skip_last_chars=0
+
+    if [ "${ext}" = "md" ]
+    then
+        tmp=`grep "^\[kursg-meta\]: # (${field}: " "${file}" | awk '{print $4}'`
+        skip_last_chars=1
+    elif [ "${ext}" = "html" ] || [ "${ext}" = "htm" ]
+    then
+        tmp=`grep "^<\!-- \[kursg-meta:${field}\]" "${file}" | cut -f3- -d\ `
+        skip_last_chars=4
+    else
+        ###
+        # file extension not recognized, exit
+        #
+
+        return
+    fi
 
     if [ -z "${tmp}" ]
     then
@@ -114,7 +131,7 @@ get_kursg_meta()
     # echo value and strip trailing ')'
     #
 
-    echo ${tmp:0:-1}
+    echo ${tmp:0:-${skip_last_chars}}
 }
 
 get_menu_name()
@@ -125,7 +142,7 @@ get_menu_name()
 
     if [ ! -z "${title}" ]
     then
-        echo ${title}
+        echo "${title}"
         return
     fi
 
@@ -133,7 +150,20 @@ get_menu_name()
     # title wasn't set in file, use first h1 element (one with ===)
     #
 
-    echo $(cat $file | grep "^=" -m1 -C1 | head -n1)
+    title=`cat $file | grep "^=" -m1 -C1 | head -n1`
+
+    if [ ! -z "${title}" ]
+    then
+        echo "${title}"
+        return
+    fi
+
+    ###
+    # title wasn't set in file, out last hope is filename
+    #
+
+    basefile=`basename ${file}`
+    echo ${basefile%.*}
 }
 
 get_file_index()
@@ -154,6 +184,57 @@ get_file_index()
     fi
 
     printf "%04d" "${index}"
+}
+
+build_menu()
+{
+    dname=$1
+    outfile=$2
+
+    menu=
+    dir=
+    dirnum=0
+
+    IFS=$'/'
+    for d in $dname
+    do
+        dir+="$d"
+        ((dirnum++))
+
+        menu+='<div class="menu">'
+        menu+='<ul class="menu">'
+        menu_links=
+
+        cd "$dir"
+        find . -maxdepth 1 \( -name "*.md" -o -name "*.html" \) -print0 | while IFS= read -r -d $'\0' f
+        do
+            f=`basename "${f}"`
+            menu_name=`get_menu_name "${f}"`
+            md_index=`get_file_index "${f}"`
+            md_name=${f%.*}
+            path=$(echo "$dir/${md_index}-${md_name}.html" | cut -c2-)
+            echo -n "<li class=\"menu\"><a class=\"menu\" href=\"$path\">" >> /tmp/kursg-menu
+            echo "$menu_name</a></li>" >> /tmp/kursg-menu
+        done
+        cd - > /dev/null
+
+        menu+=`cat /tmp/kursg-menu | sort`
+        menu+='</ul>'
+        menu+='</div>'
+        menu+='<div class="content">'
+        dir+='/'
+        rm /tmp/kursg-menu
+    done
+    IFS=
+
+    echo $menu >> $outfile
+
+    ###
+    # return number of created <div class="content"> so upper layer can
+    # close them all later when it has filled content with data
+    #
+
+    echo $dirnum
 }
 
 
@@ -256,20 +337,22 @@ else
     res="$(cd "$(dirname "${0}")" && pwd)"
 fi
 
-#
+###
 # now we can start building the site
 #
 
 cd $in
 
-find . -name "*.md" -print0 | while IFS= read -r -d $'\0' f
+###
+# process all *.md files
+#
+
+find . \( -name "*.md" -o -name "*.html" \) -print0 | while IFS= read -r -d $'\0' f
 do
     file=$(basename "$f")
     dname=$(dirname "$f")
     fname=${file%.*}
-    menu=
-    dir=
-    dirnum=0
+    rnum=0
     file_index=`get_file_index "$f"`
     outfile="${out}/${dname}/${file_index}-${fname}.html"
 
@@ -292,40 +375,11 @@ do
     # generate menu tree for file
     #
 
-    IFS=$'/'
-    for d in $dname
-    do
-        dir+="$d"
-        ((dirnum++))
-
-        menu+='<div class="menu">'
-        menu+='<ul class="menu">'
-        menu_links=
-
-        cd "$dir"
-        for md in *.md
-        do
-            menu_name=$(get_menu_name $md)
-            md_index=`get_file_index "$md"`
-            md_name=${md%.*}
-            path=$(echo "$dir/${md_index}-${md_name}.html" | cut -c2-)
-            menu_links+='<li class="menu"><a class="menu" href="'$path'">'
-            menu_links+="$menu_name</a></li>\n"
-        done
-        cd - > /dev/null
-
-        menu+=`echo -e "${menu_links}" | sort`
-        menu+='</ul>'
-        menu+='</div>'
-        menu+='<div class="content">'
-        dir+='/'
-    done
-    IFS=
-
-    echo $menu >> $outfile
+    dirnum=`build_menu "${dname}" "${outfile}"`
 
     #
-    # generate html output from markdown file
+    # generate html output, if file is html, markdown will happily send
+    # unchanged html
     #
 
     eval $markdown $f >> $outfile
