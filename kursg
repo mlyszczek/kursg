@@ -52,7 +52,7 @@ function build_index
     echo '<link rel="stylesheet" type="text/css; charset=utf-8" href="/style.css">'
     echo '<link rel="stylesheet" type="text/css" href="/pygment.css">'
 
-    if [ -f custom.css ]
+    if [ -f "${in}/custom.css" ]
     then
         echo '<link rel="stylesheet" type="text/css" href="/custom.css">'
     fi
@@ -69,7 +69,7 @@ function build_index
     # print user defined header (logo or something like that)
     #
 
-    cat header.in
+    cat "${in}/header.in"
 
     echo '</div>'
 
@@ -111,6 +111,10 @@ get_kursg_meta()
     then
         tmp=`grep "^<\!-- \[kursg-meta:${field}\]" "${file}" | cut -f3- -d\ `
         skip_last_chars=4
+    elif [ -d "${file}" ]
+    then
+        tmp=`grep "^${field}:" "${file}/.kursg-info" 2>/dev/null | cut -f2- -d\ `
+        skip_last_chars=0
     else
         ###
         # file extension not recognized, exit
@@ -131,7 +135,12 @@ get_kursg_meta()
     # echo value and strip trailing ')'
     #
 
-    echo ${tmp:0:-${skip_last_chars}}
+    if [ $skip_last_chars -eq 0 ]
+    then
+        echo "${tmp}"
+    else
+        echo ${tmp:0:-${skip_last_chars}}
+    fi
 }
 
 get_menu_name()
@@ -150,7 +159,7 @@ get_menu_name()
     # title wasn't set in file, use first h1 element (one with ===)
     #
 
-    title=`cat $file | grep "^=" -m1 -C1 | head -n1`
+    title=`cat $file 2>/dev/null | grep "^=" -m1 -C1 | head -n1`
 
     if [ ! -z "${title}" ]
     then
@@ -205,13 +214,26 @@ build_menu()
         menu+='<ul class="menu">'
         menu_links=
 
-        cd "$dir"
-        find . -maxdepth 1 \( -name "*.md" -o -name "*.html" \) -print0 | while IFS= read -r -d $'\0' f
+        cd "${in}/${dir}"
+        find . -maxdepth 1 \( -name "*.md" -o -name "*.html" -o -type d \) -print0 | while IFS= read -r -d $'\0' f
         do
+
             f=`basename "${f}"`
             menu_name=`get_menu_name "${f}"`
             md_index=`get_file_index "${f}"`
             md_name=${f%.*}
+
+            if [ -d "${f}" ]
+            then
+                if [ -f "${f}/.kursg-ignorea" ] || [ "${f}" = "." ] || \
+                   [ -f "${f}.md" ] || [ -f "${f}.html" ]
+                then
+                    continue
+                fi
+
+                md_name="${f}"
+            fi
+
             path=$(echo "$dir/${md_index}-${md_name}.html" | cut -c2-)
             echo -n "<li class=\"menu\"><a class=\"menu\" href=\"$path\">" >> /tmp/kursg-menu
             echo "$menu_name</a></li>" >> /tmp/kursg-menu
@@ -261,11 +283,11 @@ do
         ;;
 
     i)
-        in="$OPTARG"
+        in="`pwd`/$OPTARG"
         ;;
 
     o)
-        out="$OPTARG"
+        out="`pwd`/$OPTARG"
         ;;
 
     d)
@@ -398,10 +420,65 @@ do
     #
 
     echo "<div id="footer">" >> $outfile
-    cat footer.in >> $outfile
+    cat "${in}/footer.in" >> $outfile
     echo "</div>" >> $outfile
 
     close_index $outfile
+done
+
+###
+# process all folders that don't have matchin file with content
+#
+
+find . -type d -print0 | while IFS= read -r -d $'\0' dir
+do
+    cd "${dir}" > /dev/null
+
+    find . -maxdepth 1 -type d -print0 | while IFS= read -r -d $'\0' d
+    do
+        if [ -f "${d}.md" ] || [ -f "${d}.html" ] || [ "${d}" = "." ]
+        then
+            ###
+            # folder has coresponding source file and it was already parsed
+            # earlier, ignoring
+            #
+            # also we skip if folder name is .
+            #
+
+            continue
+        fi
+
+        file_title=`get_menu_name "${d}"`
+        file_index=`get_file_index "${d}"`
+        file_name=`basename "${d}"`
+        outfile="${out}/${dir}/${file_index}-${file_name}.html"
+
+        mkdir -p "${out}/${dir}"
+        build_index "${outfile}"
+        dirnum=`build_menu "${dir}/${file_name}" "${outfile}"`
+
+        #
+        # closing all opened <div class="content"> tags
+        #
+
+        for (( c=1; c<=$dirnum; c++ ))
+        do
+            echo '</div>' >> $outfile
+        done
+
+        #
+        # add footer
+        #
+
+        echo "<div id="footer">" >> $outfile
+        cat "${in}/footer.in" >> $outfile
+        echo "</div>" >> $outfile
+
+        close_index $outfile
+
+    done
+
+    cd - > /dev/null
 done
 
 #
@@ -417,7 +494,7 @@ cp $res/pygments/$pygment.css $out/pygment.css
 
 if [ -f custom.css ]
 then
-    cp custom.css $out
+    cp "${in}/custom.css" $out
 fi
 
 if [ ! -f static.in ]
