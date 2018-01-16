@@ -197,17 +197,17 @@ get_meta_order()
 
 build_menu()
 {
-    dname="${1}"
-    outfile="${2}"
+    local dname="${1}"
+    local outfile="${2}"
 
-    menu=
-    dir=
-    dirnum=0
+    local menu=
+    local dir=
+    local dirnum=0
 
     IFS=$'/'
-    for d in "${dname}"
+    for d in ${dname}
     do
-        dir+="$d"
+        dir+="${d}"
         ((dirnum++))
 
         menu+='<div class="menu">'
@@ -217,7 +217,6 @@ build_menu()
         cd "${in}/${dir}" 2> /dev/null
         find . -maxdepth 1 \( -name "*.md" -o -name "*.html" -o -type d \) -print0 | while IFS= read -r -d $'\0' f
         do
-
             f="$(basename "${f}")"
             file_title="$(get_meta_title "${f}")"
             file_order="$(get_meta_order "${f}")"
@@ -239,6 +238,7 @@ build_menu()
             echo "${file_title}</a></li>" >> /tmp/kursg-menu
         done
         cd - > /dev/null
+        IFS=$'/'
 
         menu+="$(cat /tmp/kursg-menu | sort)"
         menu+='</ul>'
