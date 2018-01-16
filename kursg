@@ -25,20 +25,20 @@ function show_help
 
 function build_index
 {
-    o=$1  # absolute path to file where index will be printed
+    o="${1}"  # absolute path to file where index will be printed
 
     #
     # make all echo redirect to $o file
     #
 
     exec 1<&-
-    exec 1<>"$o"
+    exec 1<>"${o}"
 
     #
     # truncate file if it already exists
     #
 
-    truncate -s0 $o
+    truncate -s0 "${o}"
 
     #
     #
@@ -58,9 +58,9 @@ function build_index
     fi
 
     echo '<meta charset="UTF-8">'
-    echo '<meta name="description" content="'$in_description'">'
-    echo '<meta name="keywords" content="'$in_keywords'">'
-    echo '<meta name="author" content="'$in_author'">'
+    echo '<meta name="description" content="'${in_description}'">'
+    echo '<meta name="keywords" content="'${in_keywords}'">'
+    echo '<meta name="author" content="'${in_author}'">'
     echo '</head>'
     echo '<body>'
     echo '<div id="header">'
@@ -83,10 +83,10 @@ function build_index
 
 function close_index
 {
-    o=$1  # absolute path to file where index will be printed
+    o="${1}"  # absolute path to file where index will be printed
 
-    echo '</body>' >> $o
-    echo '</html>' >> $o
+    echo '</body>' >> "${o}"
+    echo '</html>' >> "${o}"
 
     #
     # restore echo output
@@ -97,23 +97,23 @@ function close_index
 
 get_kursg_meta()
 {
-    file="$1"
-    field="$2"
+    file="${1}"
+    field="${2}"
 
     ext="${file##*.}"
     skip_last_chars=0
 
     if [ "${ext}" = "md" ]
     then
-        tmp=`grep "^\[kursg-meta\]: # (${field}: " "${file}" | awk '{print $4}'`
+        tmp="$(grep "^\[kursg-meta\]: # (${field}: " "${file}" | awk '{print $4}')"
         skip_last_chars=1
     elif [ "${ext}" = "html" ] || [ "${ext}" = "htm" ]
     then
-        tmp=`grep "^<\!-- \[kursg-meta:${field}\]" "${file}" | cut -f3- -d\ `
+        tmp="$(grep "^<\!-- \[kursg-meta:${field}\]" "${file}" | cut -f3- -d\ )"
         skip_last_chars=4
     elif [ -d "${file}" ]
     then
-        tmp=`grep "^${field}:" "${file}/.kursg-info" 2>/dev/null | cut -f2- -d\ `
+        tmp="$(grep "^${field}:" "${file}/.kursg-info" 2>/dev/null | cut -f2- -d\ )"
         skip_last_chars=0
     else
         ###
@@ -143,11 +143,11 @@ get_kursg_meta()
     fi
 }
 
-get_menu_name()
+get_meta_title()
 {
-    file=$1
+    file="${1}"
 
-    title=`get_kursg_meta "$file" "title"`
+    title="$(get_kursg_meta "${file}" "title")"
 
     if [ ! -z "${title}" ]
     then
@@ -159,7 +159,7 @@ get_menu_name()
     # title wasn't set in file, use first h1 element (one with ===)
     #
 
-    title=`cat $file 2>/dev/null | grep "^=" -m1 -C1 | head -n1`
+    title="$(cat ${file} 2>/dev/null | grep "^=" -m1 -C1 | head -n1)"
 
     if [ ! -z "${title}" ]
     then
@@ -171,41 +171,41 @@ get_menu_name()
     # title wasn't set in file, out last hope is filename
     #
 
-    basefile=`basename ${file}`
+    basefile="$(basename ${file})"
     echo ${basefile%.*}
 }
 
-get_file_index()
+get_meta_order()
 {
-    file="$1"
+    file="${1}"
 
-    index=`get_kursg_meta "$file" "index"`
+    order="$(get_kursg_meta "${file}" "order")"
 
-    if [ -z "${index}" ]
+    if [ -z "${order}" ]
     then
         ###
-        # index was not set, apply maximum possible index and let it be sorted
-        # alphabetically, after files that have index set
+        # order was not set, apply maximum possible order and let it be sorted
+        # alphabetically, after files that have order set
         #
 
         echo "9999"
         return
     fi
 
-    printf "%04d" "${index}"
+    printf "%04d" "${order}"
 }
 
 build_menu()
 {
-    dname=$1
-    outfile=$2
+    dname="${1}"
+    outfile="${2}"
 
     menu=
     dir=
     dirnum=0
 
     IFS=$'/'
-    for d in $dname
+    for d in "${dname}"
     do
         dir+="$d"
         ((dirnum++))
@@ -218,10 +218,10 @@ build_menu()
         find . -maxdepth 1 \( -name "*.md" -o -name "*.html" -o -type d \) -print0 | while IFS= read -r -d $'\0' f
         do
 
-            f=`basename "${f}"`
-            menu_name=`get_menu_name "${f}"`
-            md_index=`get_file_index "${f}"`
-            md_name=${f%.*}
+            f="$(basename "${f}")"
+            file_title="$(get_meta_title "${f}")"
+            file_order="$(get_meta_order "${f}")"
+            file_name=${f%.*}
 
             if [ -d "${f}" ]
             then
@@ -231,16 +231,16 @@ build_menu()
                     continue
                 fi
 
-                md_name="${f}"
+                file_name="${f}"
             fi
 
-            path=$(echo "$dir/${md_index}-${md_name}.html" | cut -c2-)
-            echo -n "<li class=\"menu\"><a class=\"menu\" href=\"$path\">" >> /tmp/kursg-menu
-            echo "$menu_name</a></li>" >> /tmp/kursg-menu
+            path=$(echo "${dir}/${file_order}-${file_name}.html" | cut -c2-)
+            echo -n "<li class=\"menu\"><a class=\"menu\" href=\"${path}\">" >> /tmp/kursg-menu
+            echo "${file_title}</a></li>" >> /tmp/kursg-menu
         done
         cd - > /dev/null
 
-        menu+=`cat /tmp/kursg-menu | sort`
+        menu+="$(cat /tmp/kursg-menu | sort)"
         menu+='</ul>'
         menu+='</div>'
         menu+='<div class="content">'
@@ -249,14 +249,14 @@ build_menu()
     done
     IFS=
 
-    echo $menu >> $outfile
+    echo "${menu}" >> "${outfile}"
 
     ###
     # return number of created <div class="content"> so upper layer can
     # close them all later when it has filled content with data
     #
 
-    echo $dirnum
+    echo "${dirnum}"
 }
 
 is_ignored()
@@ -270,7 +270,7 @@ is_ignored()
             return 0
         fi
 
-        dir=`dirname "${dir}"`
+        dir="$(dirname "${dir}")"
 
         if echo "${dir}" | grep -v '/' > /dev/null
         then
@@ -305,26 +305,23 @@ OPTIND=1
 
 while getopts "h?i:o:d" opt
 do
-    case "$opt" in
+    case "${opt}" in
     h|\?)
         show_help
         exit 0
         ;;
 
     i)
-        in="`pwd`/$OPTARG"
+        in="$(pwd)/${OPTARG}"
         ;;
 
     o)
-        out="`pwd`/$OPTARG"
+        out="$(pwd)/${OPTARG}"
         ;;
 
     d)
         delete=1
         ;;
-
-
-
     esac
 done
 
@@ -332,7 +329,7 @@ done
 # source config file
 #
 
-. $in/index.in
+. "${in}/index.in"
 
 #
 # checking for program
@@ -341,21 +338,21 @@ done
 markdown_extensions="-x markdown.extensions.fenced_code -x markdown.extensions.codehilite -x markdown.extensions.toc -x markdown.extensions.admonition -x markdown.extensions.tables"
 markdown=$(which markdown_py)
 
-if [ ! -x "$markdown" ]
+if [ ! -x "${markdown}" ]
 then
     echo "python markdown (markdown_py) was not found on the system"
     exit 1
 fi
 
-markdown="$markdown $markdown_extensions"
+markdown="${markdown} ${markdown_extensions}"
 
 #
 # sanity check of output directory
 #
 
-if [ $delete = 1 ]
+if [ ${delete} -eq 1 ]
 then
-    echo "do you want to delete $out directory recursively?"
+    echo "Do you want to delete ${out} directory recursively? Type 'yes' if so."
     read answer
 
     if [ "x$answer" = "xyes" ]
@@ -364,7 +361,7 @@ then
     fi
 fi
 
-[ -d $out ] || mkdir $out
+[ -d "${out}" ] || mkdir "${out}"
 
 #
 # look for resource directory
@@ -392,7 +389,7 @@ fi
 # now we can start building the site
 #
 
-cd $in
+cd "${in}"
 
 ###
 # process all *.md files
@@ -400,11 +397,11 @@ cd $in
 
 find . \( -name "*.md" -o -name "*.html" \) -print0 | while IFS= read -r -d $'\0' f
 do
-    file=$(basename "$f")
-    dname=$(dirname "$f")
-    fname=${file%.*}
+    file="$(basename "${f}")"
+    dname="$(dirname "${f}")"
+    fname="${file%.*}"
     rnum=0
-    file_index=`get_file_index "$f"`
+    file_index="$(get_meta_order "${f}")"
     outfile="${out}/${dname}/${file_index}-${fname}.html"
 
     if is_ignored "${dname}"
@@ -412,10 +409,10 @@ do
         continue
     fi
 
-    mkdir -p $out/$dname
-    build_index $outfile
+    mkdir -p "${out}/${dname}"
+    build_index "${outfile}"
 
-    if [ "${f%.*}" = "$dname/$fname" ] && [ -d "$dname/$fname" ]
+    if [ "${f%.*}" = "${dname}/${fname}" ] && [ -d "${dname}/${fname}" ]
     then
         #
         # currently parsed file (like subsite.md) has corresponding directory
@@ -423,21 +420,21 @@ do
         # be included in subsite.html file
         #
 
-        dname+="/$fname"
+        dname+="/${fname}"
     fi
 
     #
     # generate menu tree for file
     #
 
-    dirnum=`build_menu "${dname}" "${outfile}"`
+    dirnum="$(build_menu "${dname}" "${outfile}")"
 
     #
     # generate html output, if file is html, markdown will happily send
     # unchanged html
     #
 
-    eval $markdown $f >> $outfile
+    eval "${markdown}" "\"${f}\"" >> "${outfile}"
 
     #
     # closing all opened <div class="content"> tags
@@ -445,18 +442,18 @@ do
 
     for (( c=1; c<=$dirnum; c++ ))
     do
-        echo '</div>' >> $outfile
+        echo '</div>' >> "${outfile}"
     done
 
     #
     # add footer
     #
 
-    echo "<div id="footer">" >> $outfile
-    cat "${in}/footer.in" >> $outfile
-    echo "</div>" >> $outfile
+    echo "<div id="footer">" >> "${outfile}"
+    cat "${in}/footer.in" >> "${outfile}"
+    echo "</div>" >> "${outfile}"
 
-    close_index $outfile
+    close_index "${outfile}"
 done
 
 ###
@@ -484,14 +481,14 @@ do
             continue
         fi
 
-        file_title=`get_menu_name "${d}"`
-        file_index=`get_file_index "${d}"`
-        file_name=`basename "${d}"`
-        outfile="${out}/${dir}/${file_index}-${file_name}.html"
+        file_title="$(get_meta_title "${d}")"
+        file_order="$(get_meta_order "${d}")"
+        file_name="$(basename "${d}")"
+        outfile="${out}/${dir}/${file_order}-${file_name}.html"
 
         mkdir -p "${out}/${dir}"
         build_index "${outfile}"
-        dirnum=`build_menu "${dir}/${file_name}" "${outfile}"`
+        dirnum="$(build_menu "${dir}/${file_name}" "${outfile}")"
 
         #
         # closing all opened <div class="content"> tags
@@ -499,18 +496,18 @@ do
 
         for (( c=1; c<=$dirnum; c++ ))
         do
-            echo '</div>' >> $outfile
+            echo '</div>' >> "${outfile}"
         done
 
         #
         # add footer
         #
 
-        echo "<div id="footer">" >> $outfile
-        cat "${in}/footer.in" >> $outfile
-        echo "</div>" >> $outfile
+        echo "<div id="footer">" >> "${outfile}"
+        cat "${in}/footer.in" >> "${outfile}"
+        echo "</div>" >> "${outfile}"
 
-        close_index $outfile
+        close_index "${outfile}"
 
     done
 
@@ -521,8 +518,8 @@ done
 # copy chosen style and pygment
 #
 
-cp $res/styles/$style.css $out/style.css
-cp $res/pygments/$pygment.css $out/pygment.css
+cp "${res}/styles/${style}.css" "${out}/style.css"
+cp "${res}/pygments/${pygment}.css" "${out}/pygment.css"
 
 #
 # copy static files to output
@@ -530,7 +527,7 @@ cp $res/pygments/$pygment.css $out/pygment.css
 
 if [ -f custom.css ]
 then
-    cp "${in}/custom.css" $out
+    cp "${in}/custom.css" "${out}"
 fi
 
 if [ ! -f static.in ]
@@ -545,6 +542,6 @@ fi
 IFS=$'\n'
 for d in $(cat "static.in")
 do
-    cp -r $d $out
+    cp -r "${d}" "${out}"
 done
 unset IFS
