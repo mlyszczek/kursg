@@ -481,14 +481,20 @@ do
             continue
         fi
 
+        file_name="$(basename "${d}")"
         file_title="$(get_meta_title "${d}")"
         file_order="$(get_meta_order "${d}")"
-        file_name="$(basename "${d}")"
+        file_index="$(get_kursg_meta "${d}" "index")"
         outfile="${out}/${dir}/${file_order}-${file_name}.html"
 
         mkdir -p "${out}/${dir}"
         build_index "${outfile}"
         dirnum="$(build_menu "${dir}/${file_name}" "${outfile}")"
+
+        if [ -f "${d}/${file_index}" ]
+        then
+            eval "${markdown}" "\"${d}/${file_index}\"" >> "${outfile}"
+        fi
 
         #
         # closing all opened <div class="content"> tags
