@@ -25,7 +25,10 @@ function show_help
 
 function build_index
 {
-    o="${1}"  # absolute path to file where index will be printed
+    local o="${1}"  # absolute path to file where index will be printed
+    local d="${2}"  # depth of generated file in regard of root
+
+    local prefix="./"
 
     #
     # make all echo redirect to $o file
@@ -40,7 +43,15 @@ function build_index
 
     truncate -s0 "${o}"
 
+    ###
+    # generate relative prefix for css content
     #
+
+    for c in $(seq 1 1 ${d})
+    do
+        prefix+="../"
+    done
+
     #
     # build index and meta information from index.in
     #
@@ -49,12 +60,12 @@ function build_index
     echo '<html lang="pl">'
     echo '<head>'
     echo '<title>'$in_title'</title>'
-    echo '<link rel="stylesheet" type="text/css; charset=utf-8" href="/style.css">'
-    echo '<link rel="stylesheet" type="text/css" href="/pygment.css">'
+    echo '<link rel="stylesheet" type="text/css; charset=utf-8" href="'${prefix}'style.css">'
+    echo '<link rel="stylesheet" type="text/css" href="'${prefix}'pygment.css">'
 
     if [ -f "${in}/custom.css" ]
     then
-        echo '<link rel="stylesheet" type="text/css" href="/custom.css">'
+        echo '<link rel="stylesheet" type="text/css" href="'${prefix}'custom.css">'
     fi
 
     echo '<meta charset="UTF-8">'
@@ -199,10 +210,27 @@ build_menu()
 {
     local dname="${1}"
     local outfile="${2}"
+    local depth="${3}"
 
     local menu=
     local dir=
+    local prefix="./"
     local dirnum=0
+
+    ###
+    # generate relative prefix for site links
+    #
+
+    for c in $(seq 1 1 ${depth})
+    do
+        prefix+="../"
+    done
+
+    ###
+    # a little hack to pass variable to piped while
+    #
+
+    echo "${prefix}" > /tmp/kursg-menu-prefix
 
     IFS=$'/'
     for d in ${dname}
@@ -221,6 +249,7 @@ build_menu()
             file_title="$(get_meta_title "${f}")"
             file_order="$(get_meta_order "${f}")"
             file_name=${f%.*}
+            prefix="$(cat /tmp/kursg-menu-prefix)"
 
             if [ -d "${f}" ]
             then
@@ -233,7 +262,8 @@ build_menu()
                 file_name="${f}"
             fi
 
-            path=$(echo "${dir}/${file_order}-${file_name}.html" | cut -c2-)
+            path=$(echo "${dir}/${file_order}-${file_name}.html" | cut -c3-)
+            path="${prefix}${path}"
             echo -n "<li class=\"menu\"><a class=\"menu\" href=\"${path}\">" >> /tmp/kursg-menu
             echo "${file_title}</a></li>" >> /tmp/kursg-menu
         done
@@ -250,6 +280,7 @@ build_menu()
         rm /tmp/kursg-menu
     done
     IFS=
+    rm /tmp/kursg-menu-prefix
 
     echo "${menu}" >> "${outfile}"
 
@@ -410,8 +441,9 @@ do
         continue
     fi
 
+    depth="$(echo "${dname}" | tr -cd '/' | wc -c)"
     mkdir -p "${out}/${dname}"
-    build_index "${outfile}"
+    build_index "${outfile}" "${depth}"
 
     if [ "${f%.*}" = "${dname}/${fname}" ] && [ -d "${dname}/${fname}" ]
     then
@@ -428,7 +460,7 @@ do
     # generate menu tree for file
     #
 
-    dirnum="$(build_menu "${dname}" "${outfile}")"
+    dirnum="$(build_menu "${dname}" "${outfile}" "${depth}")"
 
     #
     # generate html output, if file is html, markdown will happily send
@@ -488,9 +520,10 @@ do
         file_index="$(get_kursg_meta "${d}" "index")"
         outfile="${out}/${dir}/${file_name}.html"
 
+        depth="$(echo "${dir}" | tr -cd '/' | wc -c)"
         mkdir -p "${out}/${dir}"
-        build_index "${outfile}"
-        dirnum="$(build_menu "${dir}/${file_name}" "${outfile}")"
+        build_index "${outfile}" "${depth}"
+        dirnum="$(build_menu "${dir}/${file_name}" "${outfile}" "${depth}")"
 
         if [ -f "${d}/${file_index}" ]
         then
