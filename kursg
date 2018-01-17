@@ -440,6 +440,7 @@ do
     file="$(basename "${f}")"
     dname="$(dirname "${f}")"
     fname="${file%.*}"
+    ext="${file##*.}"
     rnum=0
     outfile="${out}/${dname}/${fname}.html"
 
@@ -469,12 +470,16 @@ do
 
     dirnum="$(build_menu "${dname}" "${outfile}" "${depth}")"
 
-    #
-    # generate html output, if file is html, markdown will happily send
-    # unchanged html
+    ###
+    # generate html output,
     #
 
-    eval "${markdown}" "\"${f}\"" >> "${outfile}"
+    if [ "${ext}" = "md" ]
+    then
+        eval "${markdown}" "\"${f}\"" >> "${outfile}"
+    else
+        cat "${f}" >> "${outfile}"
+    fi
 
     #
     # closing all opened <div class="content"> tags
@@ -543,7 +548,7 @@ do
 
         if [ -f "${d}/${file_index}" ]
         then
-            eval "${markdown}" "\"${d}/${file_index}\"" > /tmp/kursg-file-index
+            cat "${d}/${file_index}" > /tmp/kursg-file-index
             sed -i '/href=\"\.\.\//I { s/\.\.\//\.\//g }' /tmp/kursg-file-index
             cat /tmp/kursg-file-index >> "${outfile}"
             rm /tmp/kursg-file-index
