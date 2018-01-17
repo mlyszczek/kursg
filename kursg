@@ -525,6 +525,15 @@ do
         build_index "${outfile}" "${depth}"
         dirnum="$(build_menu "${dir}/${file_name}" "${outfile}" "${depth}")"
 
+        if [ -z "${file_index}" ]
+        then
+            ###
+            # index file not defined, try to find one to use
+            #
+
+            file_index="$(basename "$(find "${d}" -maxdepth 1 -name "*.md" -o -name "*.html" -print -quit)")"
+        fi
+
         if [ -f "${d}/${file_index}" ]
         then
             eval "${markdown}" "\"${d}/${file_index}\"" > /tmp/kursg-file-index
