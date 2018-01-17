@@ -396,6 +396,13 @@ fi
 
 [ -d "${out}" ] || mkdir "${out}"
 
+###
+# add .kursg-ignore to out directory, so we don't include it in parsing,
+# we will remove it after parsing
+#
+
+touch "${out}/.kursg-ignore"
+
 #
 # look for resource directory
 #
@@ -563,6 +570,10 @@ do
     done
     cd - > /dev/null
 done
+
+outbase="$(basename ${out})"
+rm "${out}/.kursg-ignore"
+rm -f "${out}/${outbase}.html"
 
 #
 # copy chosen style and pygment
