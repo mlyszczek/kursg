@@ -1,13 +1,25 @@
 #!/usr/bin/env bash
 
-#  ==========================================================================
+## ==========================================================================
 #   Licensed under BSD 2clause license. See LICENSE file for more information
 #   Author: Michał Łyszczek <michal.lyszczek@bofc.pl>
-#  ==========================================================================
+## ==========================================================================
 
+
+## ==========================================================================
+#               ____                     __   _
+#              / __/__  __ ____   _____ / /_ (_)____   ____   _____
+#             / /_ / / / // __ \ / ___// __// // __ \ / __ \ / ___/
+#            / __// /_/ // / / // /__ / /_ / // /_/ // / / /(__  )
+#           /_/   \__,_//_/ /_/ \___/ \__//_/ \____//_/ /_//____/
 #
-# functions and stuff
-#
+## ==========================================================================
+
+
+## ==========================================================================
+#   prints help, what else would show_help function do?
+## ==========================================================================
+
 
 function show_help
 {
@@ -19,25 +31,27 @@ function show_help
     echo -e "\t-d        delete output directory before generating"
 }
 
-#
-# builds index of all html files
-#
+
+## ==========================================================================
+#   builds html, head and header section for given file
+## ==========================================================================
+
 
 function build_index
 {
-    local o="${1}"  # absolute path to file where index will be printed
-    local d="${2}"  # depth of generated file in regard of root
+    local o="${1}"     # absolute path to file where index will be printed
+    local d="${2}"     # depth of generated file in regard of root
 
-    local prefix="./"
+    local prefix="./"  # prefix to use for relative paths
 
-    #
+    ###
     # make all echo redirect to $o file
     #
 
     exec 1<&-
     exec 1<>"${o}"
 
-    #
+    ###
     # truncate file if it already exists
     #
 
@@ -52,7 +66,7 @@ function build_index
         prefix+="../"
     done
 
-    #
+    ###
     # build index and meta information from index.in
     #
 
@@ -76,7 +90,7 @@ function build_index
     echo '<body>'
     echo '<div id="header">'
 
-    #
+    ###
     # print user defined header (logo or something like that)
     #
 
@@ -84,35 +98,47 @@ function build_index
 
     echo '</div>'
 
-    #
+    ###
     # restore echo output
     #
 
     exec &>/dev/tty
 }
+
+
+## ==========================================================================
+#   prints ending body and html to output file
+## ==========================================================================
 
 
 function close_index
 {
-    o="${1}"  # absolute path to file where index will be printed
+    local o="${1}"  # absolute path to file where index will be printed
 
     echo '</body>' >> "${o}"
     echo '</html>' >> "${o}"
 
-    #
+    ###
     # restore echo output
     #
 
     exec &>/dev/tty
 }
 
+
+## ==========================================================================
+#   retrieves meta object  from given file  (or directory),  value is echoed
+#   end if value was not found for given field, empty string is returned
+## ==========================================================================
+
+
 get_kursg_meta()
 {
-    file="${1}"
-    field="${2}"
+    local file="${1}"        # file (or directory) to retrieve value from
+    local field="${2}"       # field to get value for
 
-    ext="${file##*.}"
-    skip_last_chars=0
+    local ext="${file##*.}"  # extension of file to read value from
+    local skip_last_chars=0  # number of character to remove from read value
 
     if [ "${ext}" = "md" ]
     then
@@ -154,11 +180,18 @@ get_kursg_meta()
     fi
 }
 
+
+## ==========================================================================
+#   reads title  meta-object from given file,  returns empty string if title
+#   couldn't have been found. title field will be used as name for <a> later
+## ==========================================================================
+
+
 get_meta_title()
 {
-    file="${1}"
+    local file="${1}"  # file to read title from
 
-    title="$(get_kursg_meta "${file}" "title")"
+    local title="$(get_kursg_meta "${file}" "title")"
 
     if [ ! -z "${title}" ]
     then
@@ -186,11 +219,19 @@ get_meta_title()
     echo ${basefile%.*}
 }
 
+
+## ==========================================================================
+#   reads order meta-object from given file. order field determines in what
+#   order generated pages will appear in "<li><a>" objects. If order is not
+#   define, order 9999 is returned
+## ==========================================================================
+
+
 get_meta_order()
 {
-    file="${1}"
+    local file="${1}"  # file to read order from
 
-    order="$(get_kursg_meta "${file}" "order")"
+    local order="$(get_kursg_meta "${file}" "order")"
 
     if [ -z "${order}" ]
     then
@@ -206,16 +247,23 @@ get_meta_order()
     printf "%04d" "${order}"
 }
 
+
+## ==========================================================================
+#   builds menu (using <li><a> construct) for current passed directory and
+#   all previous directories in tree.
+## ==========================================================================
+
+
 build_menu()
 {
-    local dname="${1}"
-    local outfile="${2}"
-    local depth="${3}"
+    local dname="${1}"    # directory to generate menu for
+    local outfile="${2}"  # file where to save generated menu
+    local depth="${3}"    # how deep in tree is outfile (used for prefix)
 
-    local menu=
-    local dir=
-    local prefix="./"
-    local dirnum=0
+    local menu=           # variable to hold generated menu
+    local dir=            # holds currently directory that is parsed
+    local prefix="./"     # prefix to use for link generation
+    local dirnum=0        # number of directories parsed.
 
     ###
     # generate relative prefix for site links
@@ -292,9 +340,16 @@ build_menu()
     echo "${dirnum}"
 }
 
+
+## ==========================================================================
+#   checks if any directory in path contains .kursg-ignore. Returns true
+#   if path should not be parsed, or false if folder should not be ignored
+## ==========================================================================
+
+
 is_ignored()
 {
-    local dir="${1}"
+    local dir="${1}"  # path to check for .kursg-ignore file
 
     while true
     do
@@ -322,12 +377,17 @@ is_ignored()
 }
 
 
-################################################################################
-# the real code starts here
-################################################################################
-
-
+## ==========================================================================
+#                                __                __
+#                         _____ / /_ ____ _ _____ / /_
+#                        / ___// __// __ `// ___// __/
+#                       (__  )/ /_ / /_/ // /   / /_
+#                      /____/ \__/ \__,_//_/    \__/
 #
+## ==========================================================================
+
+
+###
 # parse input parameters
 #
 
@@ -358,14 +418,14 @@ do
     esac
 done
 
-#
+###
 # source config file
 #
 
 . "${in}/index.in"
 
-#
-# checking for program
+###
+# checking whether markdown_py is present
 #
 
 markdown_extensions="-x markdown.extensions.fenced_code -x markdown.extensions.codehilite -x markdown.extensions.toc -x markdown.extensions.admonition -x markdown.extensions.tables"
@@ -379,7 +439,7 @@ fi
 
 markdown="${markdown} ${markdown_extensions}"
 
-#
+###
 # sanity check of output directory
 #
 
@@ -403,11 +463,11 @@ fi
 
 touch "${out}/.kursg-ignore"
 
-#
+###
 # look for resource directory
 #
 
-res=
+res=  # directory with resource (css styles)
 
 if [ -d "/usr/share/kursg" ]
 then
@@ -418,10 +478,11 @@ then
     res="/usr/local/share/kursg"
 
 else
-    #
+    ###
     # resource not found on the system, assuming portable instalation and that
     # resources are in the same directory as kursg program
     #
+
     res="$(cd "$(dirname "${0}")" && pwd)"
 fi
 
@@ -432,30 +493,29 @@ fi
 cd "${in}"
 
 ###
-# process all *.md files
+# process all *.md and *.html
 #
 
 find . \( -name "*.md" -o -name "*.html" \) -print0 | while IFS= read -r -d $'\0' f
 do
-    file="$(basename "${f}")"
-    dname="$(dirname "${f}")"
-    fname="${file%.*}"
-    ext="${file##*.}"
-    rnum=0
-    outfile="${out}/${dname}/${fname}.html"
+    file="$(basename "${f}")" # name of file to process
+    dname="$(dirname "${f}")" # path in regard of ${in} where file is
+    fname="${file%.*}"        # file name without extension
+    ext="${file##*.}"         # and extension of the file itself
+    outfile="${out}/${dname}/${fname}.html" # output html file
+    depth="$(echo "${dname}" | tr -cd '/' | wc -c)"
 
     if is_ignored "${dname}"
     then
         continue
     fi
 
-    depth="$(echo "${dname}" | tr -cd '/' | wc -c)"
     mkdir -p "${out}/${dname}"
     build_index "${outfile}" "${depth}"
 
     if [ "${f%.*}" = "${dname}/${fname}" ] && [ -d "${dname}/${fname}" ]
     then
-        #
+        ###
         # currently parsed file (like subsite.md) has corresponding directory
         # (subsite). In such case we need to generate menu for subsite dir to
         # be included in subsite.html file
@@ -464,7 +524,7 @@ do
         dname+="/${fname}"
     fi
 
-    #
+    ###
     # generate menu tree for file
     #
 
@@ -481,7 +541,7 @@ do
         cat "${f}" >> "${outfile}"
     fi
 
-    #
+    ###
     # closing all opened <div class="content"> tags
     #
 
@@ -490,7 +550,7 @@ do
         echo '</div>' >> "${outfile}"
     done
 
-    #
+    ###
     # add footer
     #
 
@@ -554,7 +614,7 @@ do
             rm /tmp/kursg-file-index
         fi
 
-        #
+        ###
         # closing all opened <div class="content"> tags
         #
 
@@ -563,7 +623,7 @@ do
             echo '</div>' >> "${outfile}"
         done
 
-        #
+        ###
         # add footer
         #
 
@@ -580,14 +640,14 @@ outbase="$(basename ${out})"
 rm "${out}/.kursg-ignore"
 rm -f "${out}/${outbase}.html"
 
-#
+###
 # copy chosen style and pygment
 #
 
 cp "${res}/styles/${in_style}.css" "${out}/style.css"
 cp "${res}/pygments/${in_pygment}.css" "${out}/pygment.css"
 
-#
+###
 # copy static files to output
 #
 
@@ -598,7 +658,7 @@ fi
 
 if [ ! -f static.in ]
 then
-    #
+    ###
     # static.in doesn't exist, don't copy anything
     #
 
