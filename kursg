@@ -579,8 +579,8 @@ rm -f "${out}/${outbase}.html"
 # copy chosen style and pygment
 #
 
-cp "${res}/styles/${style}.css" "${out}/style.css"
-cp "${res}/pygments/${pygment}.css" "${out}/pygment.css"
+cp "${res}/styles/${in_style}.css" "${out}/style.css"
+cp "${res}/pygments/${in_pygment}.css" "${out}/pygment.css"
 
 #
 # copy static files to output
