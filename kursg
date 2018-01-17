@@ -240,7 +240,9 @@ build_menu()
         cd - > /dev/null
         IFS=$'/'
 
-        menu+="$(cat /tmp/kursg-menu | sort)"
+        sort /tmp/kursg-menu -o /tmp/kursg-menu
+        sed -i '/<li class="menu"><a class="menu" href="/ { s/[0-9][0-9][0-9][0-9]-//g }' /tmp/kursg-menu
+        menu+="$(cat /tmp/kursg-menu)"
         menu+='</ul>'
         menu+='</div>'
         menu+='<div class="content">'
@@ -401,8 +403,7 @@ do
     dname="$(dirname "${f}")"
     fname="${file%.*}"
     rnum=0
-    file_index="$(get_meta_order "${f}")"
-    outfile="${out}/${dname}/${file_index}-${fname}.html"
+    outfile="${out}/${dname}/${fname}.html"
 
     if is_ignored "${dname}"
     then
@@ -467,6 +468,7 @@ do
         continue
     fi
 
+    cd "${dir}"
     find . -maxdepth 1 -type d -print0 | while IFS= read -r -d $'\0' d
     do
         if [ -f "${d}.md" ] || [ -f "${d}.html" ] || [ "${d}" = "." ]
@@ -483,9 +485,8 @@ do
 
         file_name="$(basename "${d}")"
         file_title="$(get_meta_title "${d}")"
-        file_order="$(get_meta_order "${d}")"
         file_index="$(get_kursg_meta "${d}" "index")"
-        outfile="${out}/${dir}/${file_order}-${file_name}.html"
+        outfile="${out}/${dir}/${file_name}.html"
 
         mkdir -p "${out}/${dir}"
         build_index "${outfile}"
@@ -514,9 +515,7 @@ do
         echo "</div>" >> "${outfile}"
 
         close_index "${outfile}"
-
     done
-
     cd - > /dev/null
 done
 
