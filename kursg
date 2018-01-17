@@ -21,7 +21,7 @@
 ## ==========================================================================
 
 
-function show_help
+show_help()
 {
     echo "kursg [options]"
     echo ""
@@ -37,7 +37,7 @@ function show_help
 ## ==========================================================================
 
 
-function build_index
+build_index()
 {
     local o="${1}"     # absolute path to file where index will be printed
     local d="${2}"     # depth of generated file in regard of root
@@ -111,7 +111,7 @@ function build_index
 ## ==========================================================================
 
 
-function close_index
+close_index()
 {
     local o="${1}"  # absolute path to file where index will be printed
 
@@ -545,7 +545,7 @@ do
     # closing all opened <div class="content"> tags
     #
 
-    for (( c=1; c<=$dirnum; c++ ))
+    for i in $(seq 1 1 ${dirnum})
     do
         echo '</div>' >> "${outfile}"
     done
@@ -618,7 +618,7 @@ do
         # closing all opened <div class="content"> tags
         #
 
-        for (( c=1; c<=$dirnum; c++ ))
+        for i in $(seq 1 1 ${dirnum})
         do
             echo '</div>' >> "${outfile}"
         done
