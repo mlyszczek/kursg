@@ -527,7 +527,10 @@ do
 
         if [ -f "${d}/${file_index}" ]
         then
-            eval "${markdown}" "\"${d}/${file_index}\"" >> "${outfile}"
+            eval "${markdown}" "\"${d}/${file_index}\"" > /tmp/kursg-file-index
+            sed -i '/href=\"\.\.\//I { s/\.\.\//\.\//g }' /tmp/kursg-file-index
+            cat /tmp/kursg-file-index >> "${outfile}"
+            rm /tmp/kurst-file-index
         fi
 
         #
