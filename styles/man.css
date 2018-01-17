@@ -321,6 +321,13 @@ li li li
     width: 64ch;
 }
 
+dl
+{
+    margin-top: 2ch;
+    margin-bottom: 2ch;
+    margin-left: 8ch;
+}
+
 p
 {
     margin-top: 0ch;
@@ -332,6 +339,17 @@ p
     max-width: 80ch;
     line-height: 110%;
 }
+
+pre
+{
+    margin-top: 0ch;
+    margin-bottom: 1ch;
+    margin-left: 8ch;
+    text-justify: inter-word;
+    overflow: hidden;
+    max-width: 80ch;
+}
+
 
 h1, h2, h3
 {
@@ -351,13 +369,13 @@ h3
     margin-left: 8ch;
 }
 
-em
+em, i
 {
     color: #5aff8d;
     text-decoration: underline;
 }
 
-strong
+strong, b
 {
     color: red;
     font-weight: bold;
