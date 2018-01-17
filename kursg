@@ -57,7 +57,7 @@ function build_index
     #
 
     echo '<!DOCTYPE html>'
-    echo '<html lang="pl">'
+    echo '<html lang="'${in_lang}'">'
     echo '<head>'
     echo '<title>'$in_title'</title>'
     echo '<link rel="stylesheet" type="text/css; charset=utf-8" href="'${prefix}'style.css">'
