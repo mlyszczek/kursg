@@ -593,7 +593,7 @@ do
             # index file not defined, try to find one to use
             #
 
-            file_index="$(basename "$(find "${d}" -maxdepth 1 -name "*.md" -o -name "*.html" -print -quit)")"
+            file_index="$(basename "$(find "${d}" -maxdepth 1 -name "*.md" -o -name "*.html" -quit)")"
         fi
 
         if [ -f "${d}/${file_index}" ]
