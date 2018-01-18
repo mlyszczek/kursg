@@ -651,12 +651,12 @@ cp "${res}/pygments/${in_pygment}.css" "${out}/pygment.css"
 # copy static files to output
 #
 
-if [ -f custom.css ]
+if [ -f "${in}/custom.css" ]
 then
     cp "${in}/custom.css" "${out}"
 fi
 
-if [ ! -f static.in ]
+if [ ! -f "${in}/static.in" ]
 then
     ###
     # static.in doesn't exist, don't copy anything
@@ -666,8 +666,8 @@ then
 fi
 
 IFS=$'\n'
-for d in $(cat "static.in")
+for d in $(cat "${in}/static.in")
 do
-    cp -r "${d}" "${out}"
+    cp -r "${in}/${d}" "${out}"
 done
 unset IFS
