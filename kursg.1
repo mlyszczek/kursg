@@ -1,0 +1,386 @@
+.TH "KURSG" "1" "18 January 2018 (v1.0.0)" "bofc.pl"
+
+.SH NAME
+
+\fBkursg\fR - \fBkur\fRwinet \fBs\fRite \fBg\fRenerator. Generates simple static
+webpages from markdown and html files.
+
+.SH SYNOPSIS
+
+kursg [options]
+
+.SH OPTIONS
+
+.TP
+\fB-\fRh
+print this help message
+
+.TP
+\fB-i\fR <\fIpath\fR>
+directory to process
+
+.TP
+\fB-o\fR <\fIpath\fR>
+output directory
+
+.TP
+\fB-d\fR
+delete output directory before generating
+
+.SH DESCRIPTION
+
+\fBkursg\fR is very simple static site generator. It's purpose is to create
+sites that focus on content rather than look or dynamic javascript features.
+Main strength of this program is that creating source for site is very easy,
+just create couple of simple control files and bunch of markdown or html and
+then run \fBkursg\fR on that directory and you're done.
+
+.SH "GENERATION RULES"
+
+Program iterates through all \fBmarkdown\fR, \fBhtml\fR files and
+\fBdirectories\fR.
+
+Output tree will be same as input, so if program finds \fBdirectory/site.md\fR
+file in input, in output directory \fBdirectory/site.html\fR file will be
+created.
+
+Menu is generated for each directory in path in cascade style. If file
+\fBdir1/dir2/site.md\fR is parsed, program will generate links for all sites
+in root directory, then \fBdir1\fR and then for \fBdir2\fR. For following
+file structure and file \fB./sub3/sub4/site7.md\fR following menu and html
+structure will be generated
+
+.nf
+\&.
+├── header.in
+├── footer.in
+├── index.in
+├── site0.md
+├── sub1
+│   ├── site1.md
+│   └── site2.md
+├── sub1.md
+├── sub2
+│   └── site3.md
+└── sub3
+    ├── site4.md
+    ├── site5.md
+    ├── site6.md
+    └── sub4
+        ├── site7.md
+        └── site8.md
+.fi
+
+.nf
+\&.
+├── index.html
+├── sub1
+│   ├── site.html
+│   └── site2.html
+├── sub1.html
+├── sub2
+│   └── site3.html
+├── sub2.html
+├── sub3
+│   ├── site4.html
+│   ├── site5.html
+│   ├── site6.html
+│   ├── sub4
+│   │   ├── site7.html
+│   │   └── site8.html
+│   └── sub4.html
+└── sub3.html
+.fi
+
+.nf
++-----------------------------------------------------+
+| header                                              |
++-------+-------+-------+-----------------------------+
+| sub1  | site4 | site7 | <contents of site7.md file> |
+| sub2  | site5 | sute8 |                             |
+| sub3  | site6 |       |                             |
+| site0 | sub4  |       |                             |
++-------+-------+-------+-----------------------------+
+| footer                                              |
++-----------------------------------------------------+
+.fi
+
+Each directory will have matching \fBhtml\fR file generated. If directory
+is named same as filename (without extension), \fBkursg\fR will use that file
+instead generating own. In the above example, \fBsub4\fR directory will have
+generated \fBsub4.html\fR file (in the same directory as \fBsub4\fR) and that
+will include level 2 menu (for \fBsite{4,5,6}\fR and \fBsub4\fR) and will be
+generated with \fBsite7.html\fR content. If we were generating page for
+\fBsub4\fR site would look same as for \fBsite7.md\fR, as \fBkursg\fR in such
+case will take first file inside \fBsub4\fR file.
+
+Here is generation flow for file \fB./sub3/sub4/site7.md\fR is:
+
+First header is generated from header.in file. Then root directory is being
+parsed and first menu is created from files in \fB.\fR directory
+
+.nf
++-----------------------------------------------------+
+| header                                              |
++-------+---------------------------------------------+
+| sub1  |
+| sub2  |
+| sub3  |
+| site0 |
++-------+
+.fi
+
+Then program goes to another directory in path, that is \fBsub3\fR, and its
+menu is appended next to first one
+
+.nf
++-----------------------------------------------------+
+| header                                              |
++-------+-------+-------------------------------------+
+| sub1  | site4 |
+| sub2  | site5 |
+| sub3  | site6 |
+| site0 | sub4  |
++-------+-------+
+.fi
+
+By analogy, next directory is parsed that is \fBsub4\fR and we get
+
+.nf
++-----------------------------------------------------+
+| header                                              |
++-------+-------+-------+-----------------------------+
+| sub1  | site4 | site7 |
+| sub2  | site5 | sute8 |
+| sub3  | site6 |       |
+| site0 | sub4  |       |
++-------+-------+-------+
+.fi
+
+Finally, content for \fBsub4\fR is appended. In this case this
+is \fBsite7.md\fR file, as \fBsub4\fR does not have matching file
+
+.nf
++-----------------------------------------------------+
+| header                                              |
++-------+-------+-------+-----------------------------+
+| sub1  | site4 | site7 | <contents of site7.md file> |
+| sub2  | site5 | sute8 |                             |
+| sub3  | site6 |       |                             |
+| site0 | sub4  |       |                             |
++-------+-------+-------+-----------------------------+
+
+And last but not least, footer is appended.
+
+.SH "META FIELDS"
+
+All \fBmarkdown\fR, \fBhtml\fR or \fB.kursg-info\fR file can contain some meta
+fields to tune how to generate that file. All fields are optionally.
+
+Since all files have different syntax, each file type need to define these
+fields differently. Syntax with examples for each filetype is
+
+\fBmarkdown\fR
+.RS 4
+
+.BI [kursg-meta]:\ #\ ( "<field-name>" :\  "<field-value>" )
+
+[kursg-meta]: # (title: about me)
+.br
+[kursg-meta]: # (order: 3)
+
+.RE
+
+\fBhtml\fR
+.RS 4
+
+.BI <!--\ [kursg-meta: "<field-name>" ]\  "<field-value>" \ -->
+
+<!-- [kursg-meta:title] about me -->
+.br
+<!-- [kursg-meta:order] 3 -->
+
+.RE
+
+\fB.kursg-info file\fR
+.RS 4
+
+.IB <field-name> ": " <field-value>
+
+title: about me
+.br
+order: 3
+
+.RE
+
+\fBtitle\fR
+.RS 4
+
+Name of the entry in menu that will link to file. If this is not set, file name
+will be used instead
+
+.RE
+
+\fBorder\fR
+.RS 4
+
+Order in which menu entry will appear in menu. Lower value means higher
+priority and entry will be put earlier in <li>
+
+.RE
+
+\fBindex\fR (only available in \fB.kursg-info\fR file)
+.RS 4
+
+If directory has no matching file (see \fB.kursg-info\fR in \fBCONTROL FILES\fR
+for more information about what is a matching file) this file will be used to
+generate content when generating site for this directory. If this option is not
+passed, first found file (alphabetically) will be used instead. If no files
+are inside folder, only menu will be generated. File must be in the same
+directory as \fB.kursg-info\fR so entry \fBfilename.md\fR is allowed by
+\fBdirectory/filename.md\fR is invalid.
+
+.RE
+
+.SH "CONTROL FILES"
+
+Control files are used to tune how site will be generated. Only \fBindex.in\fR
+file is mandatory
+
+\fBindex.in\fR (mandatory)
+.RS 4
+
+Mandatory file, defines most basic information like title of style Format of the
+file is 'key="value"' (note there is no space between key, = and "value").
+Following keys are supported
+
+.   B in_title
+.   RS 4
+
+Site title, will be put in <title> tag in every html page
+
+.   RE
+
+.   B in_description
+.   RS 4
+
+Site description, will be put in <meta name="description"> tag in every html page
+
+.   RE
+
+.   B in_keywords
+.   RS 4
+
+Site keywords, will be put in <meta name="keywords"> tag in every html page
+
+.   RE
+
+.   B in_author
+.   RS 4
+
+Author of the page, will be put in <meta name="author"> tag in every html page
+
+.   RE
+
+.   B in_lang
+.   RS 4
+
+Site language in \fBISO 639-1\fR format (like en, pl, it, jp)
+
+.   RE
+
+.   B in_pygment
+.   RS 4
+
+Pygment variant (color set) to use for generated code blocks (~~~ tag in
+markdown)
+
+.   RE
+
+.   B in_style
+.   RS 4
+
+What style to use to generate page
+
+.   RE
+.RE
+
+\fBheader.in\fR (optional)
+.RS 4
+
+Pure html code that will be put right after <body> tag between
+<div id="header"> and </div> in every generated page
+
+.RE
+
+\fBfooter.in\fR (optional)
+.RS 4
+
+Pure html code that will be put right before </body> tag between
+<div id="footer"> and </div> in every generated page
+
+.RE
+
+\fB.kursg-ignore\fR (optional)
+.RS 4
+
+If this file is present, that directory and all directories down the path will
+be ignored and pages won't be generated for them. Consider following directory
+tree
+
+.nf
+\$.
+├── d1
+│   ├── .kursg-ignore
+│   ├── d3
+│   │   └──d4
+│   └── d5
+└── d2
+.fi
+
+In that example, \fBd1\fR contains \fB.kursg-ignore\fR and thus will be ignored.
+But \fBd3\fR, \fBd4\fR and \fBd5\fR all contains \fB.kursg-ignore\fR in path
+above then, and thus will be ignored too.
+
+.RE
+
+\fB.kursg-info\fR (optional)
+. RS 4
+
+Tune how to generate html for the directory if directory does not have
+matching source file - that means folder exist but file with the same
+name (excluding extension) does not. Consider following example
+
+.nf
+\$.
+├── sub1
+│   └── .kursg-info
+├── sub1.md
+└── sub2
+    └── .kursg-info
+.fi
+
+In this example \fBsub1\fR has matching source file \fBsub1.md\fR and
+\fBsub1/.kursg-info\fR file will be ignored, as all information on how to
+generate access to \fBsub1\fR directory will be read from \fBsub1.md\fR file.
+
+Check \fBMETA FIELDS\fR to see accepted fields.
+
+.RE
+
+\fBcustom.css\fR (optional)
+.RS 4
+
+If this file is present, it will be added to generated site after css from
+\fBin_style\fR, so any css option can be overwritten or extended here
+
+.RE
+
+\fBstatic.in\fR (optional)
+.RS 4
+
+This is list of files or directories that should be copied into \fBstatic\fR
+directory in \fBoutput\fR. Directories are copied in recursive mode. Paths
+should be relative to \fBinput\fR path.
+
+.RE 4
