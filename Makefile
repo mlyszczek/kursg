@@ -20,6 +20,7 @@ install:
 	install -m 0644 -D -t $(DESTDIR)/share/kursg/pygments pygments/vim.css
 	install -m 0644 -D -t $(DESTDIR)/share/kursg/pygments pygments/vs.css
 	install -m 0644 -D -t $(DESTDIR)/share/kursg/styles   styles/man.css
+	install -m 0644 -D -t $(DESTDIR)/share/man/man1       kursg.1
 	install -m 0755 -D -t $(DESTDIR)/bin                  kursg
 
 doc:
