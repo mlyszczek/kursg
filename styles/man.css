@@ -326,6 +326,17 @@ dl
     margin-top: 2ch;
     margin-bottom: 2ch;
     margin-left: 8ch;
+    width: 80ch;
+}
+
+dl dl
+{
+    width: 72ch;
+}
+
+dl dl dl
+{
+    width: 64ch;
 }
 
 p
