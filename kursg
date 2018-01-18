@@ -139,10 +139,11 @@ get_kursg_meta()
 
     local ext="${file##*.}"  # extension of file to read value from
     local skip_last_chars=0  # number of character to remove from read value
+    local tmp=
 
     if [ "${ext}" = "md" ]
     then
-        tmp="$(grep "^\[kursg-meta\]: # (${field}: " "${file}" | awk '{print $4}')"
+        tmp="$(grep "^\[kursg-meta\]: # (${field}: " "${file}" | cut -f4- -d\ )"
         skip_last_chars=1
     elif [ "${ext}" = "html" ] || [ "${ext}" = "htm" ]
     then
@@ -165,6 +166,7 @@ get_kursg_meta()
         ###
         # field wasn't found, return nothing
         #
+
         return
     fi
 
@@ -176,7 +178,7 @@ get_kursg_meta()
     then
         echo "${tmp}"
     else
-        echo ${tmp:0:-${skip_last_chars}}
+        echo "${tmp:0:-${skip_last_chars}}"
     fi
 }
 
