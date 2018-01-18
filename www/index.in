@@ -1,0 +1,6 @@
+in_title="kursg.kurwinet.pl - kurwinet static generator"
+in_description="very simple static site generator that use markdown files and directory structure to generate webpages where content matters rather than fancy javascripts"
+in_author="Michał Łyszczek"
+in_lang="en"
+in_pygment=vim
+in_style=man
