@@ -119,26 +119,30 @@ ol.menu
 
 div.codehilite
 {
-    margin-left: 4ch;
+    margin-left: 6ch;
     margin-bottom: 4ch;
     margin-top: 4ch;
-    padding-top: 4ch;
-    padding-left: 4ch;
-    padding-bottom: 4ch;
+    padding-top: 0ch;
+    padding-left: 1ch;
+    padding-bottom: 0ch;
     padding-right: 4ch;
     border-left: solid gray 1px;
-    border-top: solid  gray 1px;
     background: 0 !important;
 }
 
 div.codehilite:before
 {
-    content: "// Przykład";
+    content: "// example";
     margin-top: -2ch;
-    margin-left: -3ch;
+    margin-left: 1ch;
     margin-bottom: 2ch;
     display: block;
     color: grey;
+}
+
+div.codehilite pre
+{
+    margin-left: 3ch;
 }
 
 div.content
