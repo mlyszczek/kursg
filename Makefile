@@ -22,3 +22,9 @@ install:
 	install -m 0644 -D -t $(DESTDIR)/share/kursg/styles   styles/man.css
 	install -m 0755 -D -t $(DESTDIR)/bin                  kursg
 
+doc:
+	./man2html.sh
+	make -C www
+
+clean:
+	make clean -C www
