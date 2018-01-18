@@ -29,3 +29,9 @@ doc:
 
 clean:
 	make clean -C www
+	make clean -C example
+
+example:
+	make -C example
+
+.PHONY: install doc clean example
