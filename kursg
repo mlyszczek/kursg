@@ -202,19 +202,7 @@ get_meta_title()
     fi
 
     ###
-    # title wasn't set in file, use first h1 element (one with ===)
-    #
-
-    title="$(cat ${file} 2>/dev/null | grep "^=" -m1 -C1 | head -n1)"
-
-    if [ ! -z "${title}" ]
-    then
-        echo "${title}"
-        return
-    fi
-
-    ###
-    # title wasn't set in file, out last hope is filename
+    # title wasn't set in file, well then just use file name
     #
 
     basefile="$(basename ${file})"
