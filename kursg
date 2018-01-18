@@ -598,7 +598,13 @@ do
 
         if [ -f "${d}/${file_index}" ]
         then
-            cat "${d}/${file_index}" > /tmp/kursg-file-index
+            if [ "${file_index##*.}" = "md" ]
+            then
+                eval "${markdown}" "\"${d}/${file_index}\"" >> "/tmp/kursg-file-index"
+            else
+                cat "${d}/${file_index}" > /tmp/kursg-file-index
+            fi
+
             sed -i '/href=\"\.\.\//I { s/\.\.\//\.\//g }' /tmp/kursg-file-index
             cat /tmp/kursg-file-index >> "${outfile}"
             rm /tmp/kursg-file-index
