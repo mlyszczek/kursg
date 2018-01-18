@@ -123,7 +123,7 @@ div.codehilite
     margin-bottom: 4ch;
     margin-top: 4ch;
     padding-top: 0ch;
-    padding-left: 1ch;
+    padding-left: 2ch;
     padding-bottom: 0ch;
     padding-right: 4ch;
     border-left: solid gray 1px;
@@ -134,7 +134,7 @@ div.codehilite:before
 {
     content: "// example";
     margin-top: -2ch;
-    margin-left: 1ch;
+    margin-left: 0ch;
     margin-bottom: 2ch;
     display: block;
     color: grey;
