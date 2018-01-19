@@ -23,7 +23,7 @@ install:
 	install -m 0644 -D -t $(DESTDIR)/share/man/man1       kursg.1
 	install -m 0755 -D -t $(DESTDIR)/bin                  kursg
 
-doc:
+www:
 	./man2html.sh
 	make -C www
 
@@ -34,4 +34,4 @@ clean:
 example:
 	make -C example
 
-.PHONY: install doc clean example
+.PHONY: install www clean example
