@@ -24,6 +24,7 @@ install:
 	install -m 0755 -D -t $(DESTDIR)/bin                  kursg
 
 www:
+	./gen-download-page.sh
 	./man2html.sh
 	make -C www
 

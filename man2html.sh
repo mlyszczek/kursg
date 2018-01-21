@@ -9,17 +9,22 @@ n="1"
 
 man2html -r -H "${hostname}" "${m}" > "${ftmp}"
 
+kursg_order="<!-- [kursg-meta:order] 2 -->"
+
 # get only body part of the file
 body_only="$(sed -n '/<BODY>/,/<\/BODY>/p' "${ftmp}")"
-echo "$body_only" > "${ftmp}"
+echo -e "${body_only}" > "${ftmp}"
 
 # remove leftover <body> and <h1>man</h1> tags from beginning
 tail -n+3 "${ftmp}" > tmp; mv tmp "${ftmp}"
 
+# make kursg.1.html to be second in order
+sed -i "1s/^/${kursg_order}\n/" "${ftmp}"
+
 # construct own h1 tag
 name="$(basename ${m})"
 name="${name%.*}"
-sed -i "1s/^/<H1>${name}(${n})<\/H1>\n<P> /" "${ftmp}"
+sed -i "2s/^/<H1>${name}(${n})<\/H1>\n<P> /" "${ftmp}"
 
 # remove uneeded links to non-existing index
 sed -i 's/<A HREF="\.\.\/index.html">Return to Main Contents<\/A><HR>//' "${ftmp}"

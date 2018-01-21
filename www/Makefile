@@ -5,3 +5,4 @@ all:
 make clean:
 	$(RM) -r out
 	$(RM) kursg.1.html
+	$(RM) downloads.html
