@@ -289,6 +289,19 @@ build_menu()
             file_name=${f%.*}
             prefix="$(cat /tmp/kursg-menu-prefix)"
 
+            content_filee="$(find "${f}" \( -name "*.md" -o -name "*.html" \) \
+                -print -quit)"
+
+            if [ -z "${content_filee}" ]
+            then
+                ###
+                # current directory has not valid failes anywhere down the path
+                # and thus we don't generate link to that empty site
+                #
+
+                continue
+            fi
+
             if [ -d "${f}" ]
             then
                 if [ -f "${f}/.kursg-ignore" ] || [ "${f}" = "." ] || \
@@ -562,6 +575,8 @@ do
         continue
     fi
 
+
+    root_dir="$(pwd)"
     cd "${dir}"
     find . -maxdepth 1 -type d -print0 | while IFS= read -r -d $'\0' d
     do
@@ -577,15 +592,45 @@ do
             continue
         fi
 
+        dir_save="${dir}"
         file_name="$(basename "${d}")"
         file_title="$(get_meta_title "${d}")"
         file_index="$(get_kursg_meta "${d}" "index")"
         outfile="${out}/${dir}/${file_name}.html"
-
         depth="$(echo "${dir}" | tr -cd '/' | wc -c)"
+
+        if [ $(find "${d}" -maxdepth 1 \( -name "*.md" -o -name "*.html" \) \
+            | wc -l) -eq 0 ]
+        then
+            ###
+            # this directory contains no files, try to find any directory
+            # below that may contain some contents
+            #
+
+            content_file="$(find "${d}" \( -name "*.md" -o -name "*.html" \) \
+                -print -quit)"
+
+            if [ -z "${content_file}" ]
+            then
+                ###
+                # there is nothing here to create site with, ignore
+                #
+
+                continue
+            fi
+            new_dir="$(dirname "${content_file:1}")"
+            dir+="${new_dir}"
+            cd "./${new_dir}"
+            d="."
+            build_index "${outfile}" "${depth}"
+            dirnum="$(build_menu "${dir}" "${outfile}" "${depth}")"
+        else
+            build_index "${outfile}" "${depth}"
+            dirnum="$(build_menu "${dir}/${file_name}" "${outfile}" "${depth}")"
+        fi
+
         mkdir -p "${out}/${dir}"
-        build_index "${outfile}" "${depth}"
-        dirnum="$(build_menu "${dir}/${file_name}" "${outfile}" "${depth}")"
+        #dirnum="$(build_menu "${dir}/${file_name}" "${outfile}" "${depth}")"
 
         if [ -z "${file_index}" ]
         then
@@ -593,7 +638,8 @@ do
             # index file not defined, try to find one to use
             #
 
-            file_index="$(basename "$(find "${d}" -maxdepth 1 \( -name "*.md" -o -name "*.html" \) -print -quit)")"
+            file_index="$(basename "$(find "${d}" -maxdepth 1 \
+                \( -name "*.md" -o -name "*.html" \) -print -quit)")"
         fi
 
         if [ -f "${d}/${file_index}" ]
@@ -605,7 +651,20 @@ do
                 cat "${d}/${file_index}" > /tmp/kursg-file-index
             fi
 
-            sed -i '/href=\"\.\.\//I { s/\.\.\//\.\//g }' /tmp/kursg-file-index
+            prefix="."
+            for c in $(seq 1 1 ${depth})
+            do
+                prefix+="/.."
+            done
+
+            if [ -z "${new_dir}" ]
+            then
+                sed -i "s:href=\"\.:href=\"${prefix}/${dir:2}/${d}/.:gI" /tmp/kursg-file-index
+            else
+                sed -i "s:href=\"\.:href=\"${prefix}${new_dir}/.:gI" /tmp/kursg-file-index
+            fi
+            #sed -i '/href=\"\.\.\//I { s/\.\.\//\.\//g }' /tmp/kursg-file-index
+
             cat /tmp/kursg-file-index >> "${outfile}"
             rm /tmp/kursg-file-index
         fi
@@ -628,8 +687,10 @@ do
         echo "</div>" >> "${outfile}"
 
         close_index "${outfile}"
+        dir="${dir_save}"
+        cd "${root_dir}/${dir}"
     done
-    cd - > /dev/null
+    cd "${root_dir}"
 done
 
 outbase="$(basename ${out})"
