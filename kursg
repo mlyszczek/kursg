@@ -249,11 +249,16 @@ build_menu()
     local dname="${1}"    # directory to generate menu for
     local outfile="${2}"  # file where to save generated menu
     local depth="${3}"    # how deep in tree is outfile (used for prefix)
+    local filename="${4}" # name of file that is processed upstream
+    local fileindex="${5}" # page that will be rendered at the end
 
     local menu=           # variable to hold generated menu
     local dir=            # holds currently directory that is parsed
     local prefix="./"     # prefix to use for link generation
     local dirnum=0        # number of directories parsed.
+    local dnamea=         # splited variable dname
+    local i=0             # iterator
+    local adir=
 
     ###
     # generate relative prefix for site links
@@ -265,9 +270,14 @@ build_menu()
     done
 
     IFS=$'/'
+    dnamea=($dname)
+
+    adir="${dnamea[0]}"
     for d in ${dname}
     do
+        ((i++))
         dir+="${d}"
+        adir+="/${dnamea[${i}]}"
         ((dirnum++))
 
         menu+='<div class="menu">'
@@ -281,6 +291,15 @@ build_menu()
             file_title="$(get_meta_title "${f}")"
             file_order="$(get_meta_order "${f}")"
             file_name=${f%.*}
+            aclass="menu"
+
+            if [ "${dir}/${f}" = "${adir}" ] || \
+               [ "${dir}/${f}" = "${adir}.md" ] || \
+               [ "${dname}/${filename}" = "${dir}/${f}" ] || \
+               [ "${dname}/${f}" = "${dname}/${fileindex}" ]
+            then
+                aclass="menu-active"
+            fi
 
             content_filee="$(find "${f}" \( -name "*.md" -o -name "*.html" \) \
                 -print -quit)"
@@ -308,15 +327,15 @@ build_menu()
 
             path=$(echo "${dir}/${file_order}-${file_name}.html" | cut -c3-)
             path="${prefix}${path}"
-            menu_links+="<li class=\"menu\"><a class=\"menu\" href=\"${path}\">"
+            menu_links+="<li class=\"menu\"><a class=\"${aclass}\" href=\"${path}\">"
             menu_links+="${file_title}</a></li>\n"
         done < <(find . -maxdepth 1 \( -name "*.md" -o -name "*.html" -o -type d \) -print0)
         cd - > /dev/null
         IFS=$'/'
 
-        menu_links="$(echo -e "${menu_links}" | sort)"
+        menu_links="$(echo -e "${menu_links}" | sort -t\" +5)"
         menu_links="$(echo -e "${menu_links}" | \
-            sed "/<li class=\"menu\"><a class=\"menu\" href=\"/ { s/[0-9][0-9][0-9][0-9]-//g }")"
+            sed "/href=\"/ { s/[0-9][0-9][0-9][0-9]-//g }")"
         menu+="${menu_links}"
         menu+='</ul>'
         menu+='</div>'
@@ -533,7 +552,7 @@ do
     # generate menu tree for file
     #
 
-    dirnum="$(build_menu "${dname}" "${outfile}" "${depth}")"
+    dirnum="$(build_menu "${dname}" "${outfile}" "${depth}" "${file}")"
 
     ###
     # generate html output,
@@ -603,6 +622,8 @@ do
         file_index="$(get_kursg_meta "${d}" "index")"
         outfile="${out}/${dir}/${file_name}.html"
         depth="$(echo "${dir}" | tr -cd '/' | wc -c)"
+        menu_file="${dir}/${file_name}"
+        file_dir="./"
 
         if [ $(find "${d}" -maxdepth 1 \( -name "*.md" -o -name "*.html" \) \
             | wc -l) -eq 0 ]
@@ -625,17 +646,12 @@ do
             fi
             new_dir="$(dirname "${content_file:1}")"
             dir+="${new_dir}"
-            cd "./${new_dir}"
             d="."
-            build_index "${outfile}" "${depth}"
-            dirnum="$(build_menu "${dir}" "${outfile}" "${depth}")"
-        else
-            build_index "${outfile}" "${depth}"
-            dirnum="$(build_menu "${dir}/${file_name}" "${outfile}" "${depth}")"
+            file_dir+="${new_dir}"
+            menu_file="${dir}"
         fi
 
-        mkdir -p "${out}/${dir}"
-        #dirnum="$(build_menu "${dir}/${file_name}" "${outfile}" "${depth}")"
+        cd "${file_dir}"
 
         if [ -z "${file_index}" ]
         then
@@ -646,6 +662,12 @@ do
             file_index="$(basename "$(find "${d}" -maxdepth 1 \
                 \( -name "*.md" -o -name "*.html" \) -print -quit)")"
         fi
+
+        build_index "${outfile}" "${depth}"
+        dirnum="$(build_menu "${menu_file}" "${outfile}" "${depth}" \
+            "${file_name}" "${file_index}")"
+        mkdir -p "${out}/${dir}"
+        #dirnum="$(build_menu "${dir}/${file_name}" "${outfile}" "${depth}")"
 
         if [ -f "${d}/${file_index}" ]
         then
