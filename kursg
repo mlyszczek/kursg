@@ -264,12 +264,6 @@ build_menu()
         prefix+="../"
     done
 
-    ###
-    # a little hack to pass variable to piped while
-    #
-
-    echo "${prefix}" > /tmp/kursg-menu-prefix
-
     IFS=$'/'
     for d in ${dname}
     do
@@ -281,13 +275,12 @@ build_menu()
         menu_links=
 
         cd "${in}/${dir}" 2> /dev/null
-        find . -maxdepth 1 \( -name "*.md" -o -name "*.html" -o -type d \) -print0 | while IFS= read -r -d $'\0' f
+        while IFS= read -r -d $'\0' f
         do
             f="$(basename "${f}")"
             file_title="$(get_meta_title "${f}")"
             file_order="$(get_meta_order "${f}")"
             file_name=${f%.*}
-            prefix="$(cat /tmp/kursg-menu-prefix)"
 
             content_filee="$(find "${f}" \( -name "*.md" -o -name "*.html" \) \
                 -print -quit)"
@@ -315,23 +308,22 @@ build_menu()
 
             path=$(echo "${dir}/${file_order}-${file_name}.html" | cut -c3-)
             path="${prefix}${path}"
-            echo -n "<li class=\"menu\"><a class=\"menu\" href=\"${path}\">" >> /tmp/kursg-menu
-            echo "${file_title}</a></li>" >> /tmp/kursg-menu
-        done
+            menu_links+="<li class=\"menu\"><a class=\"menu\" href=\"${path}\">"
+            menu_links+="${file_title}</a></li>\n"
+        done < <(find . -maxdepth 1 \( -name "*.md" -o -name "*.html" -o -type d \) -print0)
         cd - > /dev/null
         IFS=$'/'
 
-        sort /tmp/kursg-menu -o /tmp/kursg-menu
-        sed -i '/<li class="menu"><a class="menu" href="/ { s/[0-9][0-9][0-9][0-9]-//g }' /tmp/kursg-menu
-        menu+="$(cat /tmp/kursg-menu)"
+        menu_links="$(echo -e "${menu_links}" | sort)"
+        menu_links="$(echo -e "${menu_links}" | \
+            sed "/<li class=\"menu\"><a class=\"menu\" href=\"/ { s/[0-9][0-9][0-9][0-9]-//g }")"
+        menu+="${menu_links}"
         menu+='</ul>'
         menu+='</div>'
         menu+='<div class="content">'
         dir+='/'
-        rm /tmp/kursg-menu
     done
     IFS=
-    rm /tmp/kursg-menu-prefix
 
     echo "${menu}" >> "${outfile}"
 
