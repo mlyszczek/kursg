@@ -34,4 +34,7 @@ clean:
 example:
 	make -C example
 
-.PHONY: install www clean example
+dist:
+	./dist.sh
+
+.PHONY: install www clean example dist
