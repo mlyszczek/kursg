@@ -102,7 +102,10 @@ build_index()
     # restore echo output
     #
 
-    exec &>/dev/tty
+    if [ ! -z "${PS1}" ]
+    then
+        exec &>/dev/tty
+    fi
 }
 
 
@@ -122,7 +125,10 @@ close_index()
     # restore echo output
     #
 
-    exec &>/dev/tty
+    if [ ! -z "${PS1}" ]
+    then
+        exec &>/dev/tty
+    fi
 }
 
 
