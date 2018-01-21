@@ -472,22 +472,25 @@ touch "${out}/.kursg-ignore"
 
 res=  # directory with resource (css styles)
 
-if [ -d "/usr/share/kursg" ]
-then
-    res="/usr/share/kursg"
+tres="$(cd "$(dirname "${0}")" && pwd)"
 
-elif [ -d "/usr/local/share/kursg" ]
+if [ -d "${tres}/styles" ]
+then
+    res="${tres}"
+
+elif [ -d "/usr/local/share/kursg/styles" ]
 then
     res="/usr/local/share/kursg"
 
-else
-    ###
-    # resource not found on the system, assuming portable instalation and that
-    # resources are in the same directory as kursg program
-    #
+elif [ -d "/usr/share/kursg/styles" ]
+then
+    res="/usr/share/kursg"
 
-    res="$(cd "$(dirname "${0}")" && pwd)"
+else
+    echo "could not found resource directory"
+    exit 1
 fi
+
 
 ###
 # now we can start building the site
