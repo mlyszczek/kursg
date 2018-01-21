@@ -249,11 +249,16 @@ build_menu()
     local dname="${1}"    # directory to generate menu for
     local outfile="${2}"  # file where to save generated menu
     local depth="${3}"    # how deep in tree is outfile (used for prefix)
+    local filename="${4}" # name of file that is processed upstream
+    local fileindex="${5}" # page that will be rendered at the end
 
     local menu=           # variable to hold generated menu
     local dir=            # holds currently directory that is parsed
     local prefix="./"     # prefix to use for link generation
     local dirnum=0        # number of directories parsed.
+    local dnamea=         # splited variable dname
+    local i=0             # iterator
+    local adir=
 
     ###
     # generate relative prefix for site links
@@ -264,16 +269,15 @@ build_menu()
         prefix+="../"
     done
 
-    ###
-    # a little hack to pass variable to piped while
-    #
-
-    echo "${prefix}" > /tmp/kursg-menu-prefix
-
     IFS=$'/'
+    dnamea=($dname)
+
+    adir="${dnamea[0]}"
     for d in ${dname}
     do
+        ((i++))
         dir+="${d}"
+        adir+="/${dnamea[${i}]}"
         ((dirnum++))
 
         menu+='<div class="menu">'
@@ -281,13 +285,21 @@ build_menu()
         menu_links=
 
         cd "${in}/${dir}" 2> /dev/null
-        find . -maxdepth 1 \( -name "*.md" -o -name "*.html" -o -type d \) -print0 | while IFS= read -r -d $'\0' f
+        while IFS= read -r -d $'\0' f
         do
             f="$(basename "${f}")"
             file_title="$(get_meta_title "${f}")"
             file_order="$(get_meta_order "${f}")"
             file_name=${f%.*}
-            prefix="$(cat /tmp/kursg-menu-prefix)"
+            aclass="menu"
+
+            if [ "${dir}/${f}" = "${adir}" ] || \
+               [ "${dir}/${f}" = "${adir}.md" ] || \
+               [ "${dname}/${filename}" = "${dir}/${f}" ] || \
+               [ "${dname}/${f}" = "${dname}/${fileindex}" ]
+            then
+                aclass="menu-active"
+            fi
 
             content_filee="$(find "${f}" \( -name "*.md" -o -name "*.html" \) \
                 -print -quit)"
@@ -315,23 +327,22 @@ build_menu()
 
             path=$(echo "${dir}/${file_order}-${file_name}.html" | cut -c3-)
             path="${prefix}${path}"
-            echo -n "<li class=\"menu\"><a class=\"menu\" href=\"${path}\">" >> /tmp/kursg-menu
-            echo "${file_title}</a></li>" >> /tmp/kursg-menu
-        done
+            menu_links+="<li class=\"menu\"><a class=\"${aclass}\" href=\"${path}\">"
+            menu_links+="${file_title}</a></li>\n"
+        done < <(find . -maxdepth 1 \( -name "*.md" -o -name "*.html" -o -type d \) -print0)
         cd - > /dev/null
         IFS=$'/'
 
-        sort /tmp/kursg-menu -o /tmp/kursg-menu
-        sed -i '/<li class="menu"><a class="menu" href="/ { s/[0-9][0-9][0-9][0-9]-//g }' /tmp/kursg-menu
-        menu+="$(cat /tmp/kursg-menu)"
+        menu_links="$(echo -e "${menu_links}" | sort -t\" +5)"
+        menu_links="$(echo -e "${menu_links}" | \
+            sed "/href=\"/ { s/[0-9][0-9][0-9][0-9]-//g }")"
+        menu+="${menu_links}"
         menu+='</ul>'
         menu+='</div>'
         menu+='<div class="content">'
         dir+='/'
-        rm /tmp/kursg-menu
     done
     IFS=
-    rm /tmp/kursg-menu-prefix
 
     echo "${menu}" >> "${outfile}"
 
@@ -421,6 +432,9 @@ do
     esac
 done
 
+echo "in:           ${in}"
+echo "out:          ${out}"
+
 ###
 # source config file
 #
@@ -491,6 +505,7 @@ else
     exit 1
 fi
 
+echo "resources:    ${res}"
 
 ###
 # now we can start building the site
@@ -511,8 +526,11 @@ do
     outfile="${out}/${dname}/${fname}.html" # output html file
     depth="$(echo "${dname}" | tr -cd '/' | wc -c)"
 
+    echo -n "processing file: ${f} "
+
     if is_ignored "${dname}"
     then
+        echo '[ ignored ]'
         continue
     fi
 
@@ -534,7 +552,7 @@ do
     # generate menu tree for file
     #
 
-    dirnum="$(build_menu "${dname}" "${outfile}" "${depth}")"
+    dirnum="$(build_menu "${dname}" "${outfile}" "${depth}" "${file}")"
 
     ###
     # generate html output,
@@ -565,6 +583,7 @@ do
     echo "</div>" >> "${outfile}"
 
     close_index "${outfile}"
+    echo "[ ok ]"
 done
 
 ###
@@ -573,11 +592,13 @@ done
 
 find . -type d -print0 | while IFS= read -r -d $'\0' dir
 do
+    echo -n "processing directory: ${dir} "
+
     if is_ignored "${dir}"
     then
+        echo "[ ignored ]"
         continue
     fi
-
 
     root_dir="$(pwd)"
     cd "${dir}"
@@ -601,6 +622,8 @@ do
         file_index="$(get_kursg_meta "${d}" "index")"
         outfile="${out}/${dir}/${file_name}.html"
         depth="$(echo "${dir}" | tr -cd '/' | wc -c)"
+        menu_file="${dir}/${file_name}"
+        file_dir="./"
 
         if [ $(find "${d}" -maxdepth 1 \( -name "*.md" -o -name "*.html" \) \
             | wc -l) -eq 0 ]
@@ -623,17 +646,12 @@ do
             fi
             new_dir="$(dirname "${content_file:1}")"
             dir+="${new_dir}"
-            cd "./${new_dir}"
             d="."
-            build_index "${outfile}" "${depth}"
-            dirnum="$(build_menu "${dir}" "${outfile}" "${depth}")"
-        else
-            build_index "${outfile}" "${depth}"
-            dirnum="$(build_menu "${dir}/${file_name}" "${outfile}" "${depth}")"
+            file_dir+="${new_dir}"
+            menu_file="${dir}"
         fi
 
-        mkdir -p "${out}/${dir}"
-        #dirnum="$(build_menu "${dir}/${file_name}" "${outfile}" "${depth}")"
+        cd "${file_dir}"
 
         if [ -z "${file_index}" ]
         then
@@ -644,6 +662,12 @@ do
             file_index="$(basename "$(find "${d}" -maxdepth 1 \
                 \( -name "*.md" -o -name "*.html" \) -print -quit)")"
         fi
+
+        build_index "${outfile}" "${depth}"
+        dirnum="$(build_menu "${menu_file}" "${outfile}" "${depth}" \
+            "${file_name}" "${file_index}")"
+        mkdir -p "${out}/${dir}"
+        #dirnum="$(build_menu "${dir}/${file_name}" "${outfile}" "${depth}")"
 
         if [ -f "${d}/${file_index}" ]
         then
@@ -694,6 +718,7 @@ do
         cd "${root_dir}/${dir}"
     done
     cd "${root_dir}"
+    echo "[ ok ]"
 done
 
 outbase="$(basename ${out})"
