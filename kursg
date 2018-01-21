@@ -421,6 +421,9 @@ do
     esac
 done
 
+echo "in:           ${in}"
+echo "out:          ${out}"
+
 ###
 # source config file
 #
@@ -491,6 +494,7 @@ else
     exit 1
 fi
 
+echo "resources:    ${res}"
 
 ###
 # now we can start building the site
@@ -511,8 +515,11 @@ do
     outfile="${out}/${dname}/${fname}.html" # output html file
     depth="$(echo "${dname}" | tr -cd '/' | wc -c)"
 
+    echo -n "processing file: ${f} "
+
     if is_ignored "${dname}"
     then
+        echo '[ ignored ]'
         continue
     fi
 
@@ -565,6 +572,7 @@ do
     echo "</div>" >> "${outfile}"
 
     close_index "${outfile}"
+    echo "[ ok ]"
 done
 
 ###
@@ -573,11 +581,13 @@ done
 
 find . -type d -print0 | while IFS= read -r -d $'\0' dir
 do
+    echo -n "processing directory: ${dir} "
+
     if is_ignored "${dir}"
     then
+        echo "[ ignored ]"
         continue
     fi
-
 
     root_dir="$(pwd)"
     cd "${dir}"
@@ -694,6 +704,7 @@ do
         cd "${root_dir}/${dir}"
     done
     cd "${root_dir}"
+    echo "[ ok ]"
 done
 
 outbase="$(basename ${out})"
