@@ -329,9 +329,15 @@ li li li
     width: 64ch;
 }
 
+dd
+{
+    margin-left: 8ch;
+    margin-bottom: 2ch;
+}
+
 dl
 {
-    margin-top: -1ch;
+    margin-top: 0ch;
     margin-bottom: 2ch;
     margin-left: 8ch;
     width: 80ch;
