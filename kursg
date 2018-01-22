@@ -295,8 +295,12 @@ build_menu()
                 aclass="menu-active"
             fi
 
-            content_filee="$(find "${f}" \( -name "*.md" -o -name "*.html" \) \
-                -print -quit)"
+            content_filee=
+            while IFS=  read -r -d $'\0' r
+            do
+                content_filee="${r}"
+                break
+            done < <(find "${f}" \( -name "*.md" -o -name "*.html" \) -print0 | sort -z)
 
             if [ -z "${content_filee}" ]
             then
@@ -627,8 +631,12 @@ do
             # below that may contain some contents
             #
 
-            content_file="$(find "${d}" \( -name "*.md" -o -name "*.html" \) \
-                -print -quit)"
+            content_file=
+            while IFS=  read -r -d $'\0' r
+            do
+                content_file="${r}"
+                break
+            done < <(find "${d}" \( -name "*.md" -o -name "*.html" \) -print0 | sort -z)
 
             if [ -z "${content_file}" ]
             then
@@ -653,8 +661,11 @@ do
             # index file not defined, try to find one to use
             #
 
-            file_index="$(basename "$(find "${d}" -maxdepth 1 \
-                \( -name "*.md" -o -name "*.html" \) -print -quit)")"
+            while IFS=  read -r -d $'\0' r
+            do
+                file_index="$(basename "${r}")"
+                break
+            done < <(find "${d}" -maxdepth 1 \( -name "*.md" -o -name "*.html" \) -print0 | sort -z)
         fi
 
         build_index "${outfile}" "${depth}"
