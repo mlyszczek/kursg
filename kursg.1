@@ -1,518 +1,592 @@
 .TH "KURSG" "1" "18 January 2018 (v1.0.0)" "bofc.pl"
-
 .SH NAME
-
-\fBkursg\fR - \fBkur\fRwinet \fBs\fRite \fBg\fRenerator. Generates simple static
-webpages from markdown and html files.
-
+.PP
+.B kursg
+-
+.BR kur winet
+.BR s ite
+.BR g enerator.
+Generates simple static webpages from markdown and html files.
 .SH SYNOPSIS
-
+.PP
 kursg [options]
-
 .SH OPTIONS
-
+.PP
 .TP
-\fB-h\fR
-print this help message and exit
-
+.B -h
+print this help message and exit.
 .TP
-\fB-i\fR <\fIpath\fR>
+.B -i
+.RI  < "path" >
 directory to process
-
 .TP
-\fB-o\fR <\fIpath\fR>
+.B -o
+.RI < "path" >
 output directory
-
 .TP
-\fB-d\fR
+.B -d
 delete output directory before generating
-
 .SH DESCRIPTION
-
-\fBkursg\fR is very simple static site generator. It's purpose is to create
-sites that focus on content rather than look or dynamic javascript features.
+.PP
+.B kursg
+is very simple static site generator.
+It's purpose is to create sites that focus on content rather than look or
+dynamic javascript features.
 Main strength of this program is that creating source for site is very easy,
-just create couple of simple control files and bunch of markdown or html and
-then run \fBkursg\fR on that directory and you're done.
-
+just create one simple control file and bunch of markdown or html and
+then run
+.B kursg
+on that directory and you're done.
 .SH "GENERATION RULES"
-
-\fBBASIC USAGE\fR
-
-.RS 4
-
-In the most basic usage program simply iterates through all \fBmarkdown\fR,
-\fBhtml\fR files and \fBdirectories\fR and for each file creates static site.
-
+.PP
+.B BASIC USAGE
+.RS
+In the most basic usage program simply iterates through all
+.BR markdown ,
+.B html
+files and
+.B directories
+and for each file creates static site.
+.PP
 Consider following source tree with \fBmarkdown\fR files
-
-.nf
-\&.
-├── header.in
-├── footer.in
-├── index.in
-├── index.md
-├── sub1
-│   ├── page1.md
-│   └── page2.md
-├── sub2
-│   └── page3.md
-└── sub3
-    ├── page4.md
-    ├── page5.md
-    ├── page6.md
-    └── sub4
-        ├── page7.md
-        └── page8.md
-.fi
-
-For such source, following structure of \fBhtml\fR files will be generated.
-
-.nf
-\&.
-├── index.html
-├── sub1
-│   ├── page.html
-│   └── page2.html
-├── sub1.html
-├── sub2
-│   └── page3.html
-├── sub2.html
-├── sub3
-│   ├── page4.html
-│   ├── page5.html
-│   ├── page6.html
-│   ├── sub4
-│   │   ├── page7.html
-│   │   └── page8.html
-│   └── sub4.html
-└── sub3.html
-.fi
-
-Using above source tree and \fB./sub3/sub4/page7.md\fR file following site
-will be generated
-
-.nf
-+----------------------------------------------------------------------+
-| header                                                               |
-+-------+-------+-------+----------------------------------------------+
-| index | page4 | page7 | <contents of page7.md file>                  |
-| sub1  | page5 | sute8 |                                              |
-| sub2  | page6 |       |                                              |
-| sub3  | sub4  |       |                                              |
-+-------+-------+-------+----------------------------------------------+
-| footer                                                               |
-+----------------------------------------------------------------------+
-.fi
-
+.PP
+.EX
+    .
+    ├── header.in
+    ├── footer.in
+    ├── index.in
+    ├── index.md
+    ├── sub1
+    │   ├── page1.md
+    │   └── page2.md
+    ├── sub2
+    │   └── page3.md
+    └── sub3
+        ├── page4.md
+        ├── page5.md
+        ├── page6.md
+        └── sub4
+            ├── page7.md
+            └── page8.md
+.EE
+.PP
+For such source, following structure of
+.B html
+files will be generated.
+.PP
+.EX
+    .
+    ├── index.html
+    ├── sub1
+    │   ├── page.html
+    │   └── page2.html
+    ├── sub1.html
+    ├── sub2
+    │   └── page3.html
+    ├── sub2.html
+    ├── sub3
+    │   ├── page4.html
+    │   ├── page5.html
+    │   ├── page6.html
+    │   ├── sub4
+    │   │   ├── page7.html
+    │   │   └── page8.html
+    │   └── sub4.html
+    └── sub3.html
+.EE
+.PP
+Using above source tree and
+.B ./sub3/sub4/page7.md
+file following site will be generated
+.PP
+.EX
+    +------------------------------------------------------------------+
+    | header                                                           |
+    +-------+-------+-------+------------------------------------------+
+    | index | page4 | page7 | <contents of page7.md file>              |
+    | sub1  | page5 | sute8 |                                          |
+    | sub2  | page6 |       |                                          |
+    | sub3  | sub4  |       |                                          |
+    +-------+-------+-------+------------------------------------------+
+    | footer                                                           |
+    +------------------------------------------------------------------+
+.EE
+.PP
 Output directory structure will be same as input, so if program finds
-\fBsub3/page4.md\fR file in input, in output directory \fBsub3/page4.html\fR
+.B sub3/page4.md
+file in input, in output directory
+.B sub3/page4.html
 file will be created.
-
-Menu is generated for each directory in path in cascade style. Each file or
-directory will have exactly one entry in menu based on directory structure.  You
-can think of menu as of some kind of file system that presents directories and
-files.  If file \fB./sub3/sub4/page7.md\fR is parsed, program will generate
-links for all files in root directory \fB.\/\fR, then \fBsub3\fR and then for
-\fBsub4\fR. Each directory will have matching \fBhtml\fR file generated. This
-file will contain menu for all directories in path and some content based on
-options.
-
+.PP
+Menu is generated for each directory in path in cascade style.
+Each file or directory will have exactly one entry in menu based on directory
+structure.
+You can think of menu as of some kind of file system that presents directories
+and files.
+If file
+.B ./sub3/sub4/page7.md
+is parsed, program will generate links for all files in root directory
+.BR .\/ ,
+then
+.B sub3
+and then for
+.BR sub4 .
+Each directory will have matching
+.B html
+file generated.
+This file will contain menu for all directories in path and some content based
+on options.
+.PP
 To better understand this behaviour let's follow parsing flow for file
-\fB./sub3/sub4/page7.md\fR:
-
-First header is generated from header.in file. Then we generate menu listing all
-files and directories in root directory
-
-.nf
-+----------------------------------------------------------------------+
-| header                                                               |
-+-------+--------------------------------------------------------------+
-| index |
-| sub1  |
-| sub2  |
-| sub3  |
-+-------+
-.fi
-
-Then program goes to another directory in path, that is \fBsub3\fR, and its
-menu is appended next to first one. Generation rules for all menus are the same
-- a simple list of files and directories
-
-.nf
-+----------------------------------------------------------------------+
-| header                                                               |
-+-------+-------+------------------------------------------------------+
-| index | page4 |
-| sub1  | page5 |
-| sub2  | page6 |
-| sub3  | sub4  |
-+-------+-------+
-.fi
-
-By analogy, next directory is parsed, that is \fBsub4\fR and we get
-
-.nf
-+----------------------------------------------------------------------+
-| header                                                               |
-+-------+-------+-------+----------------------------------------------+
-| sub1  | page4 | page7 |
-| sub2  | page5 | sute8 |
-| sub3  | page6 |       |
-| page0 | sub4  |       |
-+-------+-------+-------+
-.fi
-
-Finally, we detect that \fBpage7.md\fR is a file, and we generate \fBhtml\fR
+.BR ./sub3/sub4/page7.md :
+.PP
+First header is generated from
+.B header.in
+file.
+Then we generate menu listing all files and directories in root directory
+.PP
+.EX
+    +------------------------------------------------------------------+
+    | header                                                           |
+    +-------+----------------------------------------------------------+
+    | index |
+    | sub1  |
+    | sub2  |
+    | sub3  |
+    +-------+
+.EE
+.PP
+Then program goes to another directory in path, that is
+.BR sub3,
+and its menu is appended next to first one.
+Generation rules for all menus are the same - a simple list of files and
+directories
+.PP
+.EX
+    +------------------------------------------------------------------+
+    | header                                                           |
+    +-------+-------+--------------------------------------------------+
+    | index | page4 |
+    | sub1  | page5 |
+    | sub2  | page6 |
+    | sub3  | sub4  |
+    +-------+-------+
+.EE
+.PP
+By analogy, next directory is parsed, that is
+.B sub4
+and we get
+.PP
+.EX
+    +------------------------------------------------------------------+
+    | header                                                           |
+    +-------+-------+-------+------------------------------------------+
+    | sub1  | page4 | page7 |
+    | sub2  | page5 | sute8 |
+    | sub3  | page6 |       |
+    | page0 | sub4  |       |
+    +-------+-------+-------+
+.EE
+.PP
+Finally, we detect that
+.B page7.md
+is a file, and we generate
+.B html
 from that file and we append it to the site.
-
-.nf
-+----------------------------------------------------------------------+
-| header                                                               |
-+-------+-------+-------+----------------------------------------------+
-| sub1  | page4 | page7 | <contents of page7.md file>                  |
-| sub2  | page5 | sute8 |                                              |
-| sub3  | page6 |       |                                              |
-| page0 | sub4  |       |                                              |
-+-------+-------+-------+----------------------------------------------+
-.fi
-
+.PP
+.EX
+    +------------------------------------------------------------------+
+    | header                                                           |
+    +-------+-------+-------+------------------------------------------+
+    | sub1  | page4 | page7 | <contents of page7.md file>              |
+    | sub2  | page5 | sute8 |                                          |
+    | sub3  | page6 |       |                                          |
+    | page0 | sub4  |       |                                          |
+    +-------+-------+-------+------------------------------------------+
+.EE
+.PP
 And last but not least, footer is appended and we get complete site.
-
-.nf
-+----------------------------------------------------------------------+
-| header                                                               |
-+-------+-------+-------+----------------------------------------------+
-| index | page4 | page7 | <contents of page7.md file>                  |
-| sub1  | page5 | sute8 |                                              |
-| sub2  | page6 |       |                                              |
-| sub3  | sub4  |       |                                              |
-+-------+-------+-------+----------------------------------------------+
-| footer                                                               |
-+----------------------------------------------------------------------+
-.fi
-
+.PP
+.EX
+    +------------------------------------------------------------------+
+    | header                                                           |
+    +-------+-------+-------+------------------------------------------+
+    | index | page4 | page7 | <contents of page7.md file>              |
+    | sub1  | page5 | sute8 |                                          |
+    | sub2  | page6 |       |                                          |
+    | sub3  | sub4  |       |                                          |
+    +-------+-------+-------+------------------------------------------+
+    | footer                                                           |
+    +------------------------------------------------------------------+
+.EE
 .RE
-
-\fBMATCHING FILES\fR
-
-.RS 4
-
+.PP
+.B MATCHING FILES
+.RS
 Matching file is a file which has same name (excluding extension) as directory
 in the same folder. ie:
-
-.nf
-\&.
-├── sub1.md
-└── sub1
-    └── page1.md
-.fi
-
-Normally, \fBkursg\fR would automatically generate \fBsub1.html\fR page with
-content of \fBpage1.md\fR. By providing \fImatching file\fR, \fBsub1.html\fR
-will be generated with contents of \fBsub1.md\fR file. \fBpage1.md\fR will still
-be reachable from \fBsub1.html\fR file from menu.
-
+.PP
+.EX
+    .
+    ├── sub1.md
+    └── sub1
+        └── page1.md
+.EE
+.PP
+Normally,
+.B kursg
+would automatically generate
+.B sub1.html
+page with content of
+.BR page1.md .
+By providing
+.IR "matching file" ,
+.B sub1.html
+will be generated with contents of
+.B sub1.md
+file.
+.B page1.md
+will still be reachable from
+.B sub1.html
+file from menu.
 .RE
-
-\fBDIRECTORIES WITHOUT FILES\fR
-
-.RS 4
-
-If needed, directories can contain only other directories and no \fBmarkdown\fR
-or \fBhtml\fR files. If that is the case, \fBkursg\fR will try to find any file
-it could use as content-file.
-
+.PP
+.B DIRECTORIES WITHOUT FILES
+.RS
+If needed, directories can contain only other directories and no
+.B markdown
+or
+.B html
+files.
+If that is the case,
+.B kursg
+will try to find any file it could use as content-file.
+.PP
 Consider following source tree:
-
-.nf
-\&.
-├── index.md
-├── sub1
-│   ├── page1.md
-│   └── sub2
-│       └── sub3
-└── sub2
-    ├── sub5
-    ├── sub6
-    │   └── sub8
-    │       └── page2.md
-    └── sub7
-        └── page3.md
-.fi
-
+.PP
+.EX
+    .
+    ├── index.md
+    ├── sub1
+    │   ├── page1.md
+    │   └── sub2
+    │       └── sub3
+    └── sub2
+        ├── sub5
+        ├── sub6
+        │   └── sub8
+        │       └── page2.md
+        └── sub7
+            └── page3.md
+.EE
+.PP
 With such tree main page will look like this:
-
-.nf
-+----------------------------------------------------------------------+
-| header                                                               |
-+-------+--------------------------------------------------------------+
-| index | <contents of index.md file>                                  |
-| sub1  |                                                              |
-| sub2  |                                                              |
-+-------+--------------------------------------------------------------+
-| footer                                                               |
-+----------------------------------------------------------------------+
-.fi
-
-Now when opening site \fBsub1\fR we'll see
-
-.nf
-+----------------------------------------------------------------------+
-| header                                                               |
-+-------+-------+------------------------------------------------------+
-| index | page1 | <contents of page1.md file >                         |
-| sub1  |       |                                                      |
-| sub2  |       |                                                      |
-+-------+-------+------------------------------------------------------+
-| footer                                                               |
-+----------------------------------------------------------------------+
-.fi
-
-Note that \fBsub2\fR and \fBsub3\fR were not included in menu, that is because
-menu entry is not generated if there are no useful files that could be used as
-content, and genereting empty links has no real value.
-
-If we open \fBsub2\fR page, we'll see this
-
-.nf
-+----------------------------------------------------------------------+
-| header                                                               |
-+-------+-------+-------+-------+--------------------------------------+
-| index | sub6  | sub8  | page2 | <contents of page2.md file>          |
-| sub1  | sub7  |       |       |                                      |
-| sub2  |       |       |       |                                      |
-+-------+-------+-------+-------+--------------------------------------+
-| footer                                                               |
-+----------------------------------------------------------------------+
-.fi
-
-Entry for \fBsub5\fR was not generated, because it is empty. \fBsub6\fR, altough
-empty, was generated because there was at least one usable file somewhere in
-the directories below. \fBsub6\fR \fBsub8\fR and \fBpage2\fR will render same
-page.
-
+.PP
+.EX
+    +------------------------------------------------------------------+
+    | header                                                           |
+    +-------+----------------------------------------------------------+
+    | index | <contents of index.md file>                              |
+    | sub1  |                                                          |
+    | sub2  |                                                          |
+    +-------+----------------------------------------------------------+
+    | footer                                                           |
+    +------------------------------------------------------------------+
+.EE
+.PP
+Now when opening site
+.B sub1
+we'll see
+.PP
+.EX
+    +------------------------------------------------------------------+
+    | header                                                           |
+    +-------+-------+--------------------------------------------------+
+    | index | page1 | <contents of page1.md file >                     |
+    | sub1  |       |                                                  |
+    | sub2  |       |                                                  |
+    +-------+-------+--------------------------------------------------+
+    | footer                                                           |
+    +------------------------------------------------------------------+
+.EE
+.PP
+Note that
+.B sub2
+and
+.B sub3
+were not included in menu, that is because menu entry is not generated if there
+are no useful files that could be used as content, and genereting empty links
+has no real value.
+.PP
+If we open
+.B sub2
+page, we'll see this
+.PP
+.EX
+    +------------------------------------------------------------------+
+    | header                                                           |
+    +-------+-------+-------+-------+----------------------------------+
+    | index | sub6  | sub8  | page2 | <contents of page2.md file>      |
+    | sub1  | sub7  |       |       |                                  |
+    | sub2  |       |       |       |                                  |
+    +-------+-------+-------+-------+----------------------------------+
+    | footer                                                           |
+    +------------------------------------------------------------------+
+.EE
+.PP
+Entry for
+.B sub5
+was not generated, because it is empty.
+.BR sub6 ,
+altough empty, was generated because there was at least one usable file
+somewhere in the directories below.
+.BR sub6 ,
+.B sub8
+and
+.B page2
+will render same page.
 .RE
-
-\fBLINKS RULES\fR
-
-.RS 4
-
-Links can both relative or absolute. Absolute links are not recommended, as such
-links will not be reachable when site is viewed directly via files, and not by
-www server. Links should always point to generated \fBhtml\fR files.
-
+.PP
+.B LINKS RULES
+.RS
+Links can both relative or absolute.
+Absolute links are not recommended, as such links will not be reachable when
+site is viewed directly via files, and not by www server.
+Links should always point to generated
+.B html
+files.
 .RE
-
 .SH "META FIELDS"
-
-All \fBmarkdown\fR, \fBhtml\fR or \fB.kursg-info\fR file can contain some meta
-fields to tune how to generate that file. All fields are optionally.
-
+.PP
+All
+.BR markdown ,
+.B html
+or
+.B .kursg-info
+files can contain some meta fields to tune how to generate that file.
+All fields are optionally.
+.PP
 Since all files have different syntax, each file type need to define these
-fields differently. Syntax with examples for each filetype is
-
-\fBmarkdown\fR
-.RS 4
-
+fields differently.
+Syntax with examples for each filetype is
+.PP
+.B markdown
+.RS
 .BI [kursg-meta]:\ #\ ( "<field-name>" :\  "<field-value>" )
-
-[kursg-meta]: # (title: about me)
-.br
-[kursg-meta]: # (order: 3)
-
+.PP
+.EX
+    [kursg-meta]: # (title: about me)
+    [kursg-meta]: # (order: 3)
+.EE
 .RE
-
-\fBhtml\fR
-.RS 4
-
+.PP
+.B html
+.RS
 .BI <!--\ [kursg-meta: "<field-name>" ]\  "<field-value>" \ -->
-
-<!-- [kursg-meta:title] about me -->
-.br
-<!-- [kursg-meta:order] 3 -->
-
+.PP
+.EX
+    <!-- [kursg-meta:title] about me -->
+    <!-- [kursg-meta:order] 3 -->
+.EE
 .RE
-
-\fB.kursg-info file\fR
-.RS 4
-
+.PP
+.B .kursg-info file
+.RS
 .IB <field-name> ": " <field-value>
-
-title: about me
-.br
-order: 3
-
+.PP
+.EX
+    title: about me
+    order: 3
+.EE
 .RE
-
-\fBtitle\fR
-.RS 4
-
-Name of the entry in menu that will link to file. If this is not set, file name
-will be used instead
-
+.PP
+.B title
+.RS
+Name of the entry in menu that will link to file.
+If this is not set, file name will be used instead
 .RE
-
-\fBorder\fR
-.RS 4
-
-Order in which menu entry will appear in menu. Lower value means higher
-priority and entry will be put earlier in <li>
-
+.PP
+.B order
+.RS
+Order in which menu entry will appear in menu.
+Lower value means higher priority and entry will be put earlier in <li>
 .RE
-
-\fBindex\fR (only available in \fB.kursg-info\fR file)
-.RS 4
-
-If directory has no matching file (see \fB.kursg-info\fR in \fBCONTROL FILES\fR
+.PP
+.B index
+(only available in
+.B .kursg-info
+file)
+.RS
+If directory has no matching file (see
+.B .kursg-info
+in
+.B CONTROL FILES
 for more information about what is a matching file) this file will be used to
-generate content when generating site for this directory. If this option is not
-passed, first found file (alphabetically) will be used instead. If no files
-are inside folder, \fBkursg\fR will try to find proper file recursively.
-File must be in the same directory as \fB.kursg-info\fR so entry
-\fBfilename.md\fR is allowed by \fBdirectory/filename.md\fR is invalid.
-
+generate content when generating site for this directory.
+If this option is not passed, first found file (alphabetically) will be used
+instead.
+If no files are inside folder,
+.B kursg
+will try to find proper file recursively.
+File must be in the same directory as
+.B .kursg-info
+so entry
+.B filename.md
+is allowed by
+.B directory/filename.md
+is invalid.
 .RE
-
 .SH "CONTROL FILES"
-
-Control files are used to tune how site will be generated. Only \fBindex.in\fR
+.PP
+Control files are used to tune how site will be generated.
+Only
+.B index.in
 file is mandatory
-
-\fBindex.in\fR (mandatory)
-.RS 4
-
-Mandatory file, defines most basic information like title of style Format of the
-file is 'key="value"' (note there is no space between key, = and "value").
+.PP
+.B index.in
+(mandatory)
+.RS
+Mandatory file, defines most basic information like title of style.
+Format of the file is 'key="value"' (note there is no space between key, = and
+"value").
 Following keys are supported
-
+.   PP
 .   B in_title
-.   RS 4
-
+.   RS
 Site title, will be put in <title> tag in every html page
-
 .   RE
-
+.   PP
 .   B in_description
-.   RS 4
-
-Site description, will be put in <meta name="description"> tag in every html page
-
+.   RS
+Site description, will be put in <meta name="description"> tag in every html
+page
 .   RE
-
+.   PP
 .   B in_keywords
-.   RS 4
-
+.   RS
 Site keywords, will be put in <meta name="keywords"> tag in every html page
-
 .   RE
-
+.   PP
 .   B in_author
-.   RS 4
-
+.   RS
 Author of the page, will be put in <meta name="author"> tag in every html page
-
 .   RE
-
+.   PP
 .   B in_lang
-.   RS 4
-
-Site language in \fBISO 639-1\fR format (like en, pl, it, jp)
-
+.   RS
+Site language in
+.B ISO 639-1
+format (like en, pl, it, jp)
 .   RE
-
+.   PP
 .   B in_pygment
-.   RS 4
-
+.   RS
 Pygment variant (color set) to use for generated code blocks (~~~ tag in
 markdown)
-
 .   RE
-
+.   PP
 .   B in_style
-.   RS 4
-
+.   RS
 What style to use to generate page
-
 .   RE
 .RE
-
-\fBheader.in\fR (optional)
-.RS 4
-
+.PP
+.B header.in
+(optional)
+.RS
 Pure html code that will be put right after <body> tag between
 <div id="header"> and </div> in every generated page
-
 .RE
-
-\fBfooter.in\fR (optional)
-.RS 4
-
+.PP
+.B footer.in
+(optional)
+.RS
 Pure html code that will be put right before </body> tag between
 <div id="footer"> and </div> in every generated page
-
 .RE
-
-\fB.kursg-ignore\fR (optional)
-.RS 4
-
+.PP
+.B .kursg-ignore
+(optional
+.RS
 If this file is present, that directory and all directories down the path will
-be ignored and pages won't be generated for them. Consider following directory
-tree
-
-.nf
-\$.
-├── d1
-│   ├── .kursg-ignore
-│   ├── d3
-│   │   └──d4
-│   └── d5
-└── d2
-.fi
-
-In that example, \fBd1\fR contains \fB.kursg-ignore\fR and thus will be ignored.
-But \fBd3\fR, \fBd4\fR and \fBd5\fR all contains \fB.kursg-ignore\fR in path
-above then, and thus will be ignored too.
-
+be ignored and pages won't be generated for them.
+Consider following directory tree
+.PP
+.EX
+    .
+    ├── d1
+    │   ├── .kursg-ignore
+    │   ├── d3
+    │   │   └──d4
+    │   └── d5
+    └── d2
+.EE
+.PP
+In that example,
+.B d1
+contains
+.B .kursg-ignore
+and thus will be ignored.
+But
+.BR d3 ,
+.B d4
+and
+.B d5
+all contains
+.B .kursg-ignore
+in path above then, and thus will be ignored too.
 .RE
-
-\fB.kursg-info\fR (optional)
-. RS 4
-
+.PP
+.B .kursg-info
+(optional)
+.RS
 Tune how to generate html for the directory if directory does not have
 matching source file - that means folder exist but file with the same
-name (excluding extension) does not. Consider following example
-
-.nf
-\$.
-├── sub1
-│   └── .kursg-info
-├── sub1.md
-└── sub2
-    └── .kursg-info
-.fi
-
-In this example \fBsub1\fR has matching source file \fBsub1.md\fR and
-\fBsub1/.kursg-info\fR file will be ignored, as all information on how to
-generate access to \fBsub1\fR directory will be read from \fBsub1.md\fR file.
-
-Check \fBMETA FIELDS\fR to see accepted fields.
-
+name (excluding extension) does not.
+Consider following example:
+.PP
+.EX
+    .
+    ├── sub1
+    │   └── .kursg-info
+    ├── sub1.md
+    └── sub2
+        └── .kursg-info
+.EE
+.PP
+In this example
+.B sub1
+has matching source file
+.B sub1.md
+and
+.B sub1/.kursg-info
+file will be ignored, as all information on how to generate access to
+.B sub1
+directory will be read from
+.B sub1.md file.
+.PP
+Check
+.B META FIELDS
+to see accepted fields.
 .RE
-
-\fBcustom.css\fR (optional)
-.RS 4
-
+.PP
+.B custom.css
+(optional)
+.RS
 If this file is present, it will be added to generated site after css from
-\fBin_style\fR, so any css option can be overwritten or extended here
-
+.BR in_style ,
+so any css option can be overwritten or extended here
 .RE
-
-\fBstatic.in\fR (optional)
-.RS 4
-
-This is list of files or directories that should be copied into \fBstatic\fR
-directory in \fBoutput\fR. Directories are copied in recursive mode. Paths
-should be relative to \fBinput\fR path.
-
-.RE 4
+.PP
+.B static.in
+(optional)
+.RS
+This is list of files or directories that should be copied into
+.B static
+directory in
+.BR output .
+Directories are copied in recursive mode.
+Pathsshould be relative to
+.B input
+path.
+.RE
