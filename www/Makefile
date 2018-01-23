@@ -1,5 +1,5 @@
 all:
-	kursg -o out
+	../kursg -o out
 	chmod a+rX out -R
 
 make clean:

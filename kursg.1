@@ -100,16 +100,16 @@ Using above source tree and
 file following site will be generated
 .PP
 .EX
-    +------------------------------------------------------------------+
-    | header                                                           |
-    +-------+-------+-------+------------------------------------------+
-    | index | page4 | page7 | <contents of page7.md file>              |
-    | sub1  | page5 | sute8 |                                          |
-    | sub2  | page6 |       |                                          |
-    | sub3  | sub4  |       |                                          |
-    +-------+-------+-------+------------------------------------------+
-    | footer                                                           |
-    +------------------------------------------------------------------+
+    +--------------------------------------------------------------+
+    | header                                                       |
+    +-------+-------+-------+--------------------------------------+
+    | index | page4 | page7 | <contents of page7.md file>          |
+    | sub1  | page5 | sute8 |                                      |
+    | sub2  | page6 |       |                                      |
+    | sub3  | sub4  |       |                                      |
+    +-------+-------+-------+--------------------------------------+
+    | footer                                                       |
+    +--------------------------------------------------------------+
 .EE
 .PP
 Output directory structure will be same as input, so if program finds
@@ -146,9 +146,9 @@ file.
 Then we generate menu listing all files and directories in root directory
 .PP
 .EX
-    +------------------------------------------------------------------+
-    | header                                                           |
-    +-------+----------------------------------------------------------+
+    +--------------------------------------------------------------+
+    | header                                                       |
+    +-------+------------------------------------------------------+
     | index |
     | sub1  |
     | sub2  |
@@ -163,9 +163,9 @@ Generation rules for all menus are the same - a simple list of files and
 directories
 .PP
 .EX
-    +------------------------------------------------------------------+
-    | header                                                           |
-    +-------+-------+--------------------------------------------------+
+    +--------------------------------------------------------------+
+    | header                                                       |
+    +-------+-------+----------------------------------------------+
     | index | page4 |
     | sub1  | page5 |
     | sub2  | page6 |
@@ -178,9 +178,9 @@ By analogy, next directory is parsed, that is
 and we get
 .PP
 .EX
-    +------------------------------------------------------------------+
-    | header                                                           |
-    +-------+-------+-------+------------------------------------------+
+    +--------------------------------------------------------------+
+    | header                                                       |
+    +-------+-------+-------+--------------------------------------+
     | sub1  | page4 | page7 |
     | sub2  | page5 | sute8 |
     | sub3  | page6 |       |
@@ -195,29 +195,29 @@ is a file, and we generate
 from that file and we append it to the site.
 .PP
 .EX
-    +------------------------------------------------------------------+
-    | header                                                           |
-    +-------+-------+-------+------------------------------------------+
-    | sub1  | page4 | page7 | <contents of page7.md file>              |
-    | sub2  | page5 | sute8 |                                          |
-    | sub3  | page6 |       |                                          |
-    | page0 | sub4  |       |                                          |
-    +-------+-------+-------+------------------------------------------+
+    +--------------------------------------------------------------+
+    | header                                                       |
+    +-------+-------+-------+--------------------------------------+
+    | sub1  | page4 | page7 | <contents of page7.md file>          |
+    | sub2  | page5 | sute8 |                                      |
+    | sub3  | page6 |       |                                      |
+    | page0 | sub4  |       |                                      |
+    +-------+-------+-------+--------------------------------------+
 .EE
 .PP
 And last but not least, footer is appended and we get complete site.
 .PP
 .EX
-    +------------------------------------------------------------------+
-    | header                                                           |
-    +-------+-------+-------+------------------------------------------+
-    | index | page4 | page7 | <contents of page7.md file>              |
-    | sub1  | page5 | sute8 |                                          |
-    | sub2  | page6 |       |                                          |
-    | sub3  | sub4  |       |                                          |
-    +-------+-------+-------+------------------------------------------+
-    | footer                                                           |
-    +------------------------------------------------------------------+
+    +--------------------------------------------------------------+
+    | header                                                       |
+    +-------+-------+-------+--------------------------------------+
+    | index | page4 | page7 | <contents of page7.md file>          |
+    | sub1  | page5 | sute8 |                                      |
+    | sub2  | page6 |       |                                      |
+    | sub3  | sub4  |       |                                      |
+    +-------+-------+-------+--------------------------------------+
+    | footer                                                       |
+    +--------------------------------------------------------------+
 .EE
 .RE
 .PP
@@ -283,15 +283,15 @@ Consider following source tree:
 With such tree main page will look like this:
 .PP
 .EX
-    +------------------------------------------------------------------+
-    | header                                                           |
-    +-------+----------------------------------------------------------+
-    | index | <contents of index.md file>                              |
-    | sub1  |                                                          |
-    | sub2  |                                                          |
-    +-------+----------------------------------------------------------+
-    | footer                                                           |
-    +------------------------------------------------------------------+
+    +--------------------------------------------------------------+
+    | header                                                       |
+    +-------+------------------------------------------------------+
+    | index | <contents of index.md file>                          |
+    | sub1  |                                                      |
+    | sub2  |                                                      |
+    +-------+------------------------------------------------------+
+    | footer                                                       |
+    +--------------------------------------------------------------+
 .EE
 .PP
 Now when opening site
@@ -299,15 +299,15 @@ Now when opening site
 we'll see
 .PP
 .EX
-    +------------------------------------------------------------------+
-    | header                                                           |
-    +-------+-------+--------------------------------------------------+
-    | index | page1 | <contents of page1.md file >                     |
-    | sub1  |       |                                                  |
-    | sub2  |       |                                                  |
-    +-------+-------+--------------------------------------------------+
-    | footer                                                           |
-    +------------------------------------------------------------------+
+    +--------------------------------------------------------------+
+    | header                                                       |
+    +-------+-------+----------------------------------------------+
+    | index | page1 | <contents of page1.md file >                 |
+    | sub1  |       |                                              |
+    | sub2  |       |                                              |
+    +-------+-------+----------------------------------------------+
+    | footer                                                       |
+    +--------------------------------------------------------------+
 .EE
 .PP
 Note that
@@ -323,15 +323,15 @@ If we open
 page, we'll see this
 .PP
 .EX
-    +------------------------------------------------------------------+
-    | header                                                           |
-    +-------+-------+-------+-------+----------------------------------+
-    | index | sub6  | sub8  | page2 | <contents of page2.md file>      |
-    | sub1  | sub7  |       |       |                                  |
-    | sub2  |       |       |       |                                  |
-    +-------+-------+-------+-------+----------------------------------+
-    | footer                                                           |
-    +------------------------------------------------------------------+
+    +--------------------------------------------------------------+
+    | header                                                       |
+    +-------+-------+-------+-------+------------------------------+
+    | index | sub6  | sub8  | page2 | <contents of page2.md file>  |
+    | sub1  | sub7  |       |       |                              |
+    | sub2  |       |       |       |                              |
+    +-------+-------+-------+-------+------------------------------+
+    | footer                                                       |
+    +--------------------------------------------------------------+
 .EE
 .PP
 Entry for
@@ -346,16 +346,14 @@ and
 .B page2
 will render same page.
 .RE
-.PP
+.TP
 .B LINKS RULES
-.RS
 Links can both relative or absolute.
 Absolute links are not recommended, as such links will not be reachable when
 site is viewed directly via files, and not by www server.
 Links should always point to generated
 .B html
 files.
-.RE
 .SH "META FIELDS"
 .PP
 All
@@ -369,54 +367,40 @@ All fields are optionally.
 Since all files have different syntax, each file type need to define these
 fields differently.
 Syntax with examples for each filetype is
-.PP
+.TP
 .B markdown
-.RS
 .BI [kursg-meta]:\ #\ ( "<field-name>" :\  "<field-value>" )
-.PP
+.br
 .EX
     [kursg-meta]: # (title: about me)
     [kursg-meta]: # (order: 3)
 .EE
-.RE
-.PP
+.TP
 .B html
-.RS
 .BI <!--\ [kursg-meta: "<field-name>" ]\  "<field-value>" \ -->
-.PP
+.br
 .EX
     <!-- [kursg-meta:title] about me -->
     <!-- [kursg-meta:order] 3 -->
 .EE
-.RE
-.PP
+.TP
 .B .kursg-info file
-.RS
 .IB <field-name> ": " <field-value>
-.PP
+.br
 .EX
     title: about me
     order: 3
 .EE
-.RE
-.PP
+.TP
 .B title
-.RS
 Name of the entry in menu that will link to file.
 If this is not set, file name will be used instead
-.RE
-.PP
+.TP
 .B order
-.RS
 Order in which menu entry will appear in menu.
 Lower value means higher priority and entry will be put earlier in <li>
-.RE
-.PP
-.B index
-(only available in
-.B .kursg-info
-file)
-.RS
+.TP
+.BR index " (only available in " .kursg-info " file) "
 If directory has no matching file (see
 .B .kursg-info
 in
@@ -435,83 +419,59 @@ so entry
 is allowed by
 .B directory/filename.md
 is invalid.
-.RE
 .SH "CONTROL FILES"
 .PP
 Control files are used to tune how site will be generated.
 Only
 .B index.in
 file is mandatory
-.PP
-.B index.in
-(mandatory)
-.RS
+.TP
+.BR index.in " (mandatory)"
 Mandatory file, defines most basic information like title of style.
 Format of the file is 'key="value"' (note there is no space between key, = and
 "value").
 Following keys are supported
-.   PP
+.PP
+.RS
+.   TP
 .   B in_title
-.   RS
 Site title, will be put in <title> tag in every html page
-.   RE
-.   PP
+.   TP
 .   B in_description
-.   RS
 Site description, will be put in <meta name="description"> tag in every html
 page
-.   RE
-.   PP
+.   TP
 .   B in_keywords
-.   RS
 Site keywords, will be put in <meta name="keywords"> tag in every html page
-.   RE
-.   PP
+.   TP
 .   B in_author
-.   RS
 Author of the page, will be put in <meta name="author"> tag in every html page
-.   RE
-.   PP
+.   TP
 .   B in_lang
-.   RS
 Site language in
 .B ISO 639-1
 format (like en, pl, it, jp)
-.   RE
-.   PP
+.   TP
 .   B in_pygment
-.   RS
 Pygment variant (color set) to use for generated code blocks (~~~ tag in
 markdown)
-.   RE
-.   PP
+.   TP
 .   B in_style
-.   RS
 What style to use to generate page
-.   RE
 .RE
-.PP
-.B header.in
-(optional)
-.RS
+.TP
+.BR header.in " (optional)"
 Pure html code that will be put right after <body> tag between
 <div id="header"> and </div> in every generated page
-.RE
-.PP
-.B footer.in
-(optional)
-.RS
+.TP
+.BR footer.in " (optional)"
 Pure html code that will be put right before </body> tag between
 <div id="footer"> and </div> in every generated page
-.RE
-.PP
-.B .kursg-ignore
-(optional
-.RS
+.TP
+.BR .kursg-ignore (optional
 If this file is present, that directory and all directories down the path will
 be ignored and pages won't be generated for them.
 Consider following directory tree
-.PP
 .EX
     .
     ├── d1
@@ -521,7 +481,8 @@ Consider following directory tree
     │   └── d5
     └── d2
 .EE
-.PP
+.br
+.br
 In that example,
 .B d1
 contains
@@ -535,16 +496,12 @@ and
 all contains
 .B .kursg-ignore
 in path above then, and thus will be ignored too.
-.RE
-.PP
-.B .kursg-info
-(optional)
-.RS
+.TP
+.BR .kursg-info " (optional)"
 Tune how to generate html for the directory if directory does not have
 matching source file - that means folder exist but file with the same
 name (excluding extension) does not.
 Consider following example:
-.PP
 .EX
     .
     ├── sub1
@@ -553,7 +510,8 @@ Consider following example:
     └── sub2
         └── .kursg-info
 .EE
-.PP
+.br
+.br
 In this example
 .B sub1
 has matching source file
@@ -564,23 +522,16 @@ file will be ignored, as all information on how to generate access to
 .B sub1
 directory will be read from
 .B sub1.md file.
-.PP
 Check
 .B META FIELDS
 to see accepted fields.
-.RE
-.PP
-.B custom.css
-(optional)
-.RS
+.TP
+.BR custom.css " (optional)"
 If this file is present, it will be added to generated site after css from
 .BR in_style ,
 so any css option can be overwritten or extended here
-.RE
-.PP
-.B static.in
-(optional)
-.RS
+.TP
+.BR static.in " (optional)"
 This is list of files or directories that should be copied into
 .B static
 directory in
@@ -589,4 +540,3 @@ Directories are copied in recursive mode.
 Pathsshould be relative to
 .B input
 path.
-.RE
