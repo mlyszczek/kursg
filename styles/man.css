@@ -337,6 +337,13 @@ dd
     line-height: 110%;
 }
 
+dd p
+{
+    margin-left: 0ch;
+    margin-bottom: 0ch;
+    margin-top: 2ch;
+}
+
 dl
 {
     margin-top: 0ch;
@@ -347,11 +354,13 @@ dl
 
 dl dl
 {
+    margin-left: 0ch;
     width: 72ch;
 }
 
 dl dl dl
 {
+    margin-left: 0ch;
     width: 64ch;
 }
 
