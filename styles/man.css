@@ -182,6 +182,12 @@ ul
     list-style-position: outside;
 }
 
+ul ul
+{
+    margin-left: 2ch;
+    margin-bottom: 0ch;
+}
+
 ol
 {
     margin-left: 8ch;
@@ -190,6 +196,12 @@ ol
     width: auto;
     list-style-type: decimal;
     list-style-position: inside;
+}
+
+ol ol
+{
+    margin-left: 2ch;
+    margin-bottom: 0ch;
 }
 
 /*
@@ -321,12 +333,17 @@ li
 
 li li
 {
-    width: 72ch;
+    width: 74ch; /* 2ch (disc) + 4ch (margin) */
 }
 
 li li li
 {
-    width: 64ch;
+    width: 70ch;
+}
+
+li li li li
+{
+    width: 66ch;
 }
 
 dd
