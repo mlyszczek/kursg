@@ -443,7 +443,7 @@ echo "out:          ${out}"
 # checking whether markdown_py is present
 #
 
-markdown_extensions="-x markdown.extensions.fenced_code -x markdown.extensions.codehilite -x markdown.extensions.toc -x markdown.extensions.admonition -x markdown.extensions.tables"
+markdown_extensions="-x markdown.extensions.fenced_code -x markdown.extensions.codehilite -x markdown.extensions.toc -x markdown.extensions.admonition -x markdown.extensions.tables -x markdown.extensions.attr_list"
 markdown=$(which markdown_py)
 
 if [ ! -x "${markdown}" ]
