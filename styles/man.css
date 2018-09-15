@@ -176,7 +176,7 @@ ul
 {
     margin-left: 8ch;
     margin-bottom: 2ch;
-    line-height: 110%;
+    line-height: 130%;
     list-style-type: disc;
     width: auto;
     list-style-position: outside;
@@ -192,7 +192,7 @@ ol
 {
     margin-left: 8ch;
     margin-bottom: 2ch;
-    line-height: 110%;
+    line-height: 130%;
     width: auto;
     list-style-type: decimal;
     list-style-position: inside;
@@ -351,7 +351,7 @@ dd
     margin-left: 8ch;
     margin-bottom: 2ch;
     text-align: justify;
-    line-height: 110%;
+    line-height: 130%;
 }
 
 dd p
@@ -390,7 +390,7 @@ p
     text-justify: inter-word;
     overflow: hidden;
     max-width: 80ch;
-    line-height: 110%;
+    line-height: 130%;
 }
 
 pre
