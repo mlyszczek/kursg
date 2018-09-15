@@ -322,7 +322,7 @@ blockquote
 
 li
 {
-    width: 80ch;
+    width: 78ch; /* 2ch (disc) */
     text-align: justify;
     text-justify: inter-word;
     margin-left: 2ch;
