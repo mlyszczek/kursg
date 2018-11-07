@@ -401,6 +401,7 @@ pre
     text-justify: inter-word;
     overflow: hidden;
     max-width: 80ch;
+    line-height: 130%;
 }
 
 
