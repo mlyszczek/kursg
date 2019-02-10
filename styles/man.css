@@ -51,6 +51,17 @@ a
     color: yellow;
 }
 
+/* workaround for man2html tool, that generates reference links that takes one
+ * line of space
+ */
+a#lbAA, a#lbAB, a#lbAC, a#lbAD, a#lbAE, a#lbAF, a#lbAG, a#lbAH, a#lbAI, a#lbAJ,
+a#lbAK, a#lbAL, a#lbAM, a#lbAN, a#lbAO, a#lbAP, a#lbAQ, a#lbAR, a#lbAS, a#lbAT,
+a#lbAU, a#lbAV, a#lbAX, a#lbAY, a#lbAZ
+{
+    display: block;
+    height: 0px;
+}
+
 a:visited
 {
     text-decoration: none;
