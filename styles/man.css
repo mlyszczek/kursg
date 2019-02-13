@@ -81,6 +81,8 @@ a.menu-active
 hr
 {
     margin-left: 8ch;
+    margin-top: 2ch;
+    margin-bottom: 2ch;
     border-style: dotted;
     border-width: 1px;
     border-color: green;
@@ -407,7 +409,7 @@ p
 pre
 {
     margin-top: 0ch;
-    margin-bottom: 1ch;
+    margin-bottom: 2ch;
     margin-left: 8ch;
     text-justify: inter-word;
     overflow: hidden;
@@ -420,7 +422,6 @@ h1, h2, h3
 {
     color: red;
     font-weight: bold;
-    margin-top: 2ch;
     text-transform: uppercase;
 }
 
