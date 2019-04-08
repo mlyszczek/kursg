@@ -425,6 +425,11 @@ h1, h2, h3
     text-transform: uppercase;
 }
 
+h1:first-of-type
+{
+    margin-top: 2ch;
+}
+
 h2
 {
     margin-left: 4ch;
