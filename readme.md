@@ -3,7 +3,7 @@
 About
 =====
 
-*kursg* - kurwinet site generator. This script generates static html site from
+*kursg* - bofc site generator. This script generates static html site from
 *markdown* and *html* files and directory structure. Idea is very simple, make
 site creation a piece of cake and focus on content - just create a bunch of
 *markdown* files and directories and it will be transformed into static website.
@@ -37,7 +37,7 @@ Documentation
 =============
 
 Full documentation (and some more info) is available at
-[kursg.kurwinet.pl](http://kursg.kurwinet.pl/kursg.1.html)
+[kursg.bofc.pl](http://kursg.bofc.pl/kursg.1.html)
 
 There is also man page to read.
 
@@ -45,13 +45,13 @@ Examples
 ========
 
 Example presenting all features can be found in...
-[example](http://git.kurwinet.pl/kursg/tree/example) directory. To build
+[example](http://git.bofc.pl/kursg/tree/example) directory. To build
 example site, call **make example**, generated website will be in
 **example/out**
 
 Also these projects use **kursg** to generate its website
 
-* [mtest](http://mtest.kurwinet.pl)
+* [mtest](http://mtest.bofc.pl)
 
 License
 =======
@@ -67,4 +67,4 @@ See also
 ========
 
 * [pygments-css](https://github.com/richleland/pygments-css) by richleland
-* [git repository](http://git.kurwinet.pl/kursg) with sources
+* [git repository](http://git.bofc.pl/kursg) with sources
