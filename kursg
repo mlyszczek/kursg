@@ -141,7 +141,7 @@ get_kursg_meta()
         skip_last_chars=1
     elif [ "${ext}" = "html" ] || [ "${ext}" = "htm" ]
     then
-        tmp="$(grep "^<\!-- \[kursg-meta:${field}\]" "${file}" | cut -f3- -d\ )"
+        tmp="$(grep "^<"'!'"-- \[kursg-meta:${field}\]" "${file}" | cut -f3- -d\ )"
         skip_last_chars=4
     elif [ -d "${file}" ]
     then
